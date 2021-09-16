@@ -54,7 +54,7 @@
 // TODO: Android Irish Laws app - ViewModelProviders is now deprecated
 
 import React, { useEffect, useState } from 'react';
-import { BackHandler, SafeAreaView, Text, View } from 'react-native';
+import { BackHandler, Modal, SafeAreaView, Text, View } from 'react-native';
 import PageHome from './pages/PageHome';
 import PageYearList from './pages/PageYearList';
 import PageDefns from './pages/PageDefns';
@@ -132,10 +132,12 @@ const App = () => {
     return () => backHandler.remove();
   }, []);
 
+  [fontSizeModal, setFontSizeModal] = useState('false');
+
   return (
     // Top app container
     <SafeAreaView style={{ flex: 1, flexDirection: 'column' }}>
-      <Toolbar />
+      <Toolbar fontSizeModal={() => setFontSizeModal()} />
       <View style={{ flex: 1 }}>
         {currentPage}
       </View>
@@ -143,6 +145,14 @@ const App = () => {
       <View style={{ height: 50, backgroundColor: 'red' }}>
         <Text>Ad</Text>
       </View>
+      {
+        fontSizeModal
+        ?
+        <Modal>
+
+        </Modal>
+        : null
+      }
 
     </SafeAreaView>
   );
