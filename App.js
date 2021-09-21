@@ -54,7 +54,7 @@
 // TODO: Android Irish Laws app - ViewModelProviders is now deprecated
 
 import React, { useEffect, useState } from 'react';
-import { BackHandler, Modal, SafeAreaView, Text, View } from 'react-native';
+import { BackHandler, Modal, Pressable, SafeAreaView, Text, TouchableWithoutFeedbackBase, View } from 'react-native';
 import PageHome from './pages/PageHome';
 import PageYearList from './pages/PageYearList';
 import PageDefns from './pages/PageDefns';
@@ -132,12 +132,14 @@ const App = () => {
     return () => backHandler.remove();
   }, []);
 
-  [fontSizeModal, setFontSizeModal] = useState('false');
+  const [isFontSizeModalVisible, setIsFontSizeModalVisible] = useState('false');
 
   return (
     // Top app container
-    <SafeAreaView style={{ flex: 1, flexDirection: 'column' }}>
-      <Toolbar fontSizeModal={() => setFontSizeModal()} />
+    <SafeAreaView style={{ flex: 1, flexDirection: 'column', backgroundColor: '#339999' }}>
+      <Toolbar
+        modalCallback={() => setIsFontSizeModalVisible()}
+      />
       <View style={{ flex: 1 }}>
         {currentPage}
       </View>
@@ -145,15 +147,43 @@ const App = () => {
       <View style={{ height: 50, backgroundColor: 'red' }}>
         <Text>Ad</Text>
       </View>
-      {
-        fontSizeModal
-        ?
-        <Modal>
-
-        </Modal>
-        : null
-      }
-
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isFontSizeModalVisible}
+        onRequestClose={() => {
+          setIsFontSizeModalVisible(false);
+        }}>
+        <View style={{
+          flex: 1,
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          margin: 40,
+          backgroundColor: "white",
+          borderRadius: 2,
+          padding: 35,
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: 2,
+          },
+          shadowOpacity: 0.25,
+          shadowRadius: 4,
+          elevation: 5,
+        }}>
+          <Text style={{ fontSize: 50 }}>Huge Text</Text>
+          <Text style={{ fontSize: 30 }}>Big Text</Text>
+          <Text style={{ fontSize: 22 }}>Medium Text</Text>
+          <Text style={{ fontSize: 16 }}>Small Text</Text>
+          <Text style={{ fontSize: 12 }}>Tiny Text</Text>
+          <Pressable
+            style={{ padding: 10 }}
+            onPress={() => setIsFontSizeModalVisible(false)}
+          >
+            <Text>Cancel</Text>
+          </Pressable>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
