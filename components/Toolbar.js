@@ -3,22 +3,37 @@ import { Image, Pressable, Text, TextInput, View } from 'react-native';
 
 const Toolbar = (props) => {
 
-  [inputShowing, setInputShowing] = useState(false);
+  const [inputShowing, setInputShowing] = useState(false);
+
+  useEffect(() => {
+    console.log('Toolbar.js detects search activated changed to ' + props.searchActivated);
+    setInputShowing(props.searchActivated);
+  }, [props.searchActivated]);
+
+  function searchRequest() {
+    if (props.searchText == '') return;
+    props.nav('defns');
+  }
 
   return (
     <View style={{ height: 56, flexDirection: 'row', justifyContent: 'space-between', elevation: 4, padding: 4 }} >
       {inputShowing
         ?
         <View style={{ flexDirection: 'row', flex: 1 }}>
-          <Pressable onPress={() => setInputShowing(false)}>
+          <Pressable onPress={() => {
+            setInputShowing(false);
+            props.setSearchActivated(false);
+          }}>
             <View style={{ width: 56, flex: 1, justifyContent: 'center', alignItems: 'center' }}>
               <Image source={require('../images/left_arrow.png')}
                 style={{ width: 24, height: 24 }} />
             </View>
           </Pressable>
-          <View style={{ flex: 1, backgroundColor: 'white', flexDirection: 'row'}}>
+          <View style={{ flex: 1, backgroundColor: 'white', flexDirection: 'row' }}>
             <TextInput
               autoFocus={true}
+              onChangeText={text => props.setSearchText(text)}
+              value={props.searchText}
               placeholder='Type here'
               placeholderTextColor='#A0A0A0'
               style={{
@@ -28,10 +43,12 @@ const Toolbar = (props) => {
                 color: 'black'
               }}
             />
-            <View style={{ width: 48, justifyContent: 'center' }}>
-              <Image source={require('../images/ic_search.png')}
-                style={{ width: 32, height: 32 }} />
-            </View>
+            <Pressable onPress={() => searchRequest()}>
+              <View style={{ width: 48, flex: 1, justifyContent: 'center' }}>
+                <Image source={require('../images/ic_search.png')}
+                  style={{ width: 32, height: 32 }} />
+              </View>
+            </Pressable>
           </View>
         </View>
         :
@@ -39,7 +56,8 @@ const Toolbar = (props) => {
           justifyContent: 'center',
           paddingLeft: 16
         }}>
-          <Text style={{ fontSize: 22, fontWeight: 'bold' }}>Irish Laws</Text>
+          <View></View>
+          <Text style={{ fontSize: 22, fontWeight: 'bold' }}>{props.title}</Text>
         </View>
       }
       <View style={{ flexDirection: 'row' }}>

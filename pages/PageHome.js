@@ -5,18 +5,25 @@ const PageHome = (props) => {
 
   const HomeButton = (plops) => {
     return (
-      <View style={[{ backgroundColor: 'white', margin: 24, padding: 16, borderRadius: 2 }, plops.style] }>
-        <Text style={{ fontSize: 22, color: '#656565' }}>
-          {plops.children}
-        </Text>
-      </View>
+      <Pressable onPress={plops.onPress}>
+        <View style={[{ backgroundColor: 'white', margin: 24, padding: 16, borderRadius: 2 }, plops.style]}>
+          <Text style={{ fontSize: 22, color: '#656565' }}>
+            {plops.children}
+          </Text>
+        </View>
+      </Pressable>
     );
   }
 
   return (
     // top container
     <View style={{ flexDirection: 'column', justifyContent: 'space-between', flex: 1 }}>
-      <HomeButton>
+      <HomeButton onPress={() => {
+        props.setSearchActivated(true);
+        console.log("In PageHome props.setSearchActivated is of type:"
+          + (typeof props.setSearchActivated));
+        console.log(props.setSearchActivated.toString());
+      }}>
         Search for definitions in Irish Laws
       </HomeButton>
       <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
@@ -27,7 +34,7 @@ const PageHome = (props) => {
             resizeMode: 'contain',
           }} />
       </View>
-      <HomeButton style={{ justifyContent: 'center', alignItems: 'center' }}>
+      <HomeButton onPress={() => props.nav('years')} style={{ justifyContent: 'center', alignItems: 'center' }}>
         Choose law by year
       </HomeButton>
 

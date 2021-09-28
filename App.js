@@ -69,20 +69,34 @@ import PageSection from './pages/PageSection';
 import Toolbar from './components/Toolbar';
 
 const App = () => {
-  const [currentPage, setCurrentPage] = useState(<PageHome nav={switchPage} />);
+  const [searchActivated, setSearchActivated] = useState(false);
+  const defaultHomePage = () => <PageHome setSearchActivated={setSearchActivated} nav={switchPage} />
+
+  useEffect(()=> {
+    console.log('App.js detects change in searchActivated: ' + searchActivated);
+  }, [searchActivated]);
+
+  const [currentPage, setCurrentPage] = useState(defaultHomePage);
+  const [toolbarTitle, setToolbarTitle] = useState('Irish Laws');
+  const [searchText, setSearchText] = useState('');
   const breadCrumbs = ['home'];
+
 
   function switchPage(pageName) {
     breadCrumbs.push(pageName);
+    setToolbarTitle('Irish Laws');
     switch (pageName) {
       case 'home':
-        setCurrentPage(<PageHome nav={switchPage} />);
+        setCurrentPage(defaultHomePage);
         break;
       case 'years':
         setCurrentPage(<PageYearList nav={switchPage} />);
         break;
       case 'defns':
-        setCurrentPage(<PageDefns nav={switchPage} />);
+        setSearchActivated(false);
+        setToolbarTitle('Search results')
+        setCurrentPage(<PageDefns nav={switchPage}
+          searchText={searchText} />);
         break;
       case 'basicInfo':
         setCurrentPage(<PageLawBasicInfo nav={switchPage} />);
@@ -138,7 +152,13 @@ const App = () => {
     // Top app container
     <SafeAreaView style={{ flex: 1, flexDirection: 'column', backgroundColor: '#339999' }}>
       <Toolbar
-        modalCallback={() => setIsFontSizeModalVisible()}
+        modalCallback={setIsFontSizeModalVisible}
+        searchText={searchText}
+        setSearchText={setSearchText}
+        nav={switchPage}
+        searchActivated={searchActivated}
+        setSearchActivated={setSearchActivated}
+        title={toolbarTitle}
       />
       <View style={{ flex: 1 }}>
         {currentPage}
