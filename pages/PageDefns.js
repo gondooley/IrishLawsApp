@@ -1,18 +1,40 @@
-import React, { useState } from 'react';
-import { Button, Text } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Button, ScrollView, Text } from 'react-native';
+import * as Database from '../database';
 
 const PageDefns = (props) => {
 
-  const [dataReturned, setDataReturned] = useState('');
-  fetch('https://levelhead.ie/scope/exact?searchTerm=' + props.searchText,
-    {
-      method: 'POST'
-    })
-    .then(response => response.json())
-    .then(data => setDataReturned(JSON.stringify(data)))
+  const [exactDefns, setExactDefns] = useState('');
+  const [partialDefns, setPartialDefns] = useState('');
+  const [usages, setUsages] = useState('');
+
+  useEffect(() => {
+    Database.fetchExactDefns(props.searchText)
+      .then(data => setExactDefns(JSON.stringify(data)))
+      .catch((error) => {
+        setExactDefns('Error: ' + error);
+      });
+    Database.fetchPartialDefns(props.searchText)
+      .then(data => setPartialDefns(JSON.stringify(data)))
+      .catch((error) => {
+        setPartialDefns('Error: ' + error);
+      });
+    Database.fetchUsages(props.searchText)
+      .then(data => setUsages(JSON.stringify(data)))
+      .catch((error) => {
+        setUsages('Error: ' + error);
+      });
+  }, []);
+
+
+  const [titlesInYear, setTitlesInYear] = useState('');
+  Database.fetchLawTitles(2021)
+    .then(data => setTitlesInYear(JSON.stringify(data)))
     .catch((error) => {
-      setDataReturned('Error: ' + error);
+      setTitlesInYear('Error: ' + error);
     });
+
+  props.setLawTitle('Particular law title set in Defns Page');
 
   return (
     <>
@@ -25,9 +47,24 @@ const PageDefns = (props) => {
         }}
         title="Choose a particular result"
         color="#841584" />
-        <Text style={{ color: 'black'}}>
-          {dataReturned}
+      <ScrollView>
+        <Text style={{ color: 'gray', fontWeight: 'bold' }}>Exact definitions</Text>
+        <Text style={{ color: 'black' }}>
+          {exactDefns}
         </Text>
+        <Text style={{ color: 'gray', fontWeight: 'bold' }}>Partial definitions</Text>
+        <Text style={{ color: 'black' }}>
+          {partialDefns}
+        </Text>
+        <Text style={{ color: 'gray', fontWeight: 'bold' }}>Usages</Text>
+        <Text style={{ color: 'black' }}>
+          {usages}
+        </Text>
+        <Text style={{ color: 'gray', fontWeight: 'bold' }}>Titles in 2021</Text>
+        <Text style={{ color: 'black' }}>
+          {titlesInYear}
+        </Text>
+      </ScrollView>
     </>
   );
 }

@@ -70,60 +70,25 @@ import Toolbar from './components/Toolbar';
 
 const App = () => {
   const [searchActivated, setSearchActivated] = useState(false);
-  const defaultHomePage = () => <PageHome setSearchActivated={setSearchActivated} nav={switchPage} />
 
-  useEffect(()=> {
-    console.log('App.js detects change in searchActivated: ' + searchActivated);
-  }, [searchActivated]);
-
-  const [currentPage, setCurrentPage] = useState(defaultHomePage);
+  const [currentPage, setCurrentPage] = useState('home');
   const [toolbarTitle, setToolbarTitle] = useState('Irish Laws');
   const [searchText, setSearchText] = useState('');
+  const [lawTitle, setLawTitle] = useState('');
+  const [basicInfo, setBasicInfo] = useState({});
+  const [parts, setParts] = useState({});
+  const [chapters, setChapters] = useState({});
+  const [scheduleNumber, setScheduleNumber] = useState(0);
   const breadCrumbs = ['home'];
-
 
   function switchPage(pageName) {
     breadCrumbs.push(pageName);
-    setToolbarTitle('Irish Laws');
-    switch (pageName) {
-      case 'home':
-        setCurrentPage(defaultHomePage);
-        break;
-      case 'years':
-        setCurrentPage(<PageYearList nav={switchPage} />);
-        break;
-      case 'defns':
-        setSearchActivated(false);
-        setToolbarTitle('Search results')
-        setCurrentPage(<PageDefns nav={switchPage}
-          searchText={searchText} />);
-        break;
-      case 'basicInfo':
-        setCurrentPage(<PageLawBasicInfo nav={switchPage} />);
-        break;
-      case 'chapters':
-        setCurrentPage(<PageLawPartChapters nav={switchPage} />);
-        break;
-      case 'parts':
-        setCurrentPage(<PageLawParts nav={switchPage} />);
-        break;
-      case 'schedules':
-        setCurrentPage(<PageLawSchedules nav={switchPage} />);
-        break;
-      case 'lawsInYear':
-        setCurrentPage(<PageLawsInYear nav={switchPage} />);
-        break;
-      case 'schedule':
-        setCurrentPage(<PageSchedule nav={switchPage} />);
-        break;
-      case 'sections':
-        setCurrentPage(<PageSections nav={switchPage} />);
-        break;
-      case 'section':
-        setCurrentPage(<PageSection nav={switchPage} />);
-        break;
-      default:
-        break;
+    setCurrentPage(pageName);
+    if (pageName == 'defns') {
+      setSearchActivated(false);
+      setToolbarTitle('Search results');
+    } else {
+      setToolbarTitle('Irish Laws');
     }
   }
 
@@ -161,7 +126,32 @@ const App = () => {
         title={toolbarTitle}
       />
       <View style={{ flex: 1 }}>
-        {currentPage}
+        { currentPage == 'home' ? <PageHome setSearchActivated={setSearchActivated} nav={switchPage} /> :null }
+        { currentPage == 'years' ? <PageYearList nav={switchPage} /> : null }
+        { currentPage == 'defns' ? <PageDefns
+          nav={switchPage}
+          searchText={searchText}
+          setLawTitle={setLawTitle} /> : null }
+        { currentPage == 'basicInfo' ? <PageLawBasicInfo nav={switchPage}
+          basicInfo={basicInfo}
+          setBasicInfo={setBasicInfo} /> : null }
+        { currentPage == 'chapters' ? <PageLawPartChapters nav={switchPage} chapters={chapters} /> : null }
+        { currentPage == 'parts' ? <PageLawParts
+          nav={switchPage}
+          setParts={setParts}
+          partsData={parts}
+          setChapters={setChapters} /> : null }
+        { currentPage == 'schedules' ? <PageLawSchedules
+          nav={switchPage}
+          basicInfo={basicInfo}
+          setScheduleNumber={setScheduleNumber} /> : null }
+        { currentPage == 'lawsInYear' ? <PageLawsInYear nav={switchPage} /> : null }
+        { currentPage == 'schedule' ? <PageSchedule
+          nav={switchPage}
+          basicInfo={basicInfo}
+          scheduleNumber={scheduleNumber} /> : null }
+        { currentPage == 'sections' ? <PageSections nav={switchPage} /> : null }
+        { currentPage == 'section' ? <PageSection nav={switchPage} lawTitle={lawTitle} /> : null }
       </View>
       {/* Ad container -  actual height*/}
       <View style={{ height: 50, backgroundColor: 'red' }}>
