@@ -8,20 +8,16 @@ const ResultsListItem = (props) => {
     let year = String(props.item).substring(0, 4);
     let numberInYear = '';
     var index = 5;
-    console.log("Checking you can index a string: " + props.item[index]);
     for (; props.item[index] != '-'; index++) {
         numberInYear += String(props.item).substr(index, 1);
-        console.log("Adding " + String(props.item).substr(index, 1) + " makes " + numberInYear);
     }
     let sectionNumber = String(props.item).substr(index + 1);
     let isSchedule = String(props.item).startsWith('schedule');
     if (isSchedule) {
         sectionNumber = String(sectionNumber).substr(8);
     }
-    console.log('About to fetch ' + numberInYear + " of " + year);
     Database.fetchBasicInfo(year, numberInYear)
         .then(basicInfo => {
-            console.log(JSON.stringify(basicInfo));
             let returningText = basicInfo.title + ", ";
             if (isSchedule) {
                 returningText += 'Schedule ';

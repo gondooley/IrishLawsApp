@@ -74,6 +74,8 @@ const App = () => {
   const [currentPage, setCurrentPage] = useState('home');
   const [toolbarTitle, setToolbarTitle] = useState('Irish Laws');
   const [searchText, setSearchText] = useState('');
+  // the string is copied at certain times to prevent automatic updates outside the search box
+  const [searchTextCopy, setSearchTextCopy] = useState('');
   const [lawTitle, setLawTitle] = useState('');
   const [basicInfo, setBasicInfo] = useState({});
   const [parts, setParts] = useState({});
@@ -83,13 +85,15 @@ const App = () => {
 
   function switchPage(pageName) {
     breadCrumbs.push(pageName);
-    setCurrentPage(pageName);
     if (pageName == 'defns') {
       setSearchActivated(false);
+      setSearchTextCopy((' ' + searchText).slice(1));
+      console.log("Search text to be sent: " + searchTextCopy);
       setToolbarTitle('Search results');
     } else {
       setToolbarTitle('Irish Laws');
     }
+    setCurrentPage(pageName);
   }
 
   useEffect(() => {
@@ -126,32 +130,32 @@ const App = () => {
         title={toolbarTitle}
       />
       <View style={{ flex: 1 }}>
-        { currentPage == 'home' ? <PageHome setSearchActivated={setSearchActivated} nav={switchPage} /> :null }
-        { currentPage == 'years' ? <PageYearList nav={switchPage} /> : null }
-        { currentPage == 'defns' ? <PageDefns
+        {currentPage == 'home' ? <PageHome setSearchActivated={setSearchActivated} nav={switchPage} /> : null}
+        {currentPage == 'years' ? <PageYearList nav={switchPage} /> : null}
+        {currentPage == 'defns' ? <PageDefns
           nav={switchPage}
-          searchText={searchText}
-          setLawTitle={setLawTitle} /> : null }
-        { currentPage == 'basicInfo' ? <PageLawBasicInfo nav={switchPage}
+          searchText={searchTextCopy}
+          setLawTitle={setLawTitle} /> : null}
+        {currentPage == 'basicInfo' ? <PageLawBasicInfo nav={switchPage}
           basicInfo={basicInfo}
-          setBasicInfo={setBasicInfo} /> : null }
-        { currentPage == 'chapters' ? <PageLawPartChapters nav={switchPage} chapters={chapters} /> : null }
-        { currentPage == 'parts' ? <PageLawParts
+          setBasicInfo={setBasicInfo} /> : null}
+        {currentPage == 'chapters' ? <PageLawPartChapters nav={switchPage} chapters={chapters} /> : null}
+        {currentPage == 'parts' ? <PageLawParts
           nav={switchPage}
           setParts={setParts}
           partsData={parts}
-          setChapters={setChapters} /> : null }
-        { currentPage == 'schedules' ? <PageLawSchedules
+          setChapters={setChapters} /> : null}
+        {currentPage == 'schedules' ? <PageLawSchedules
           nav={switchPage}
           basicInfo={basicInfo}
-          setScheduleNumber={setScheduleNumber} /> : null }
-        { currentPage == 'lawsInYear' ? <PageLawsInYear nav={switchPage} /> : null }
-        { currentPage == 'schedule' ? <PageSchedule
+          setScheduleNumber={setScheduleNumber} /> : null}
+        {currentPage == 'lawsInYear' ? <PageLawsInYear nav={switchPage} /> : null}
+        {currentPage == 'schedule' ? <PageSchedule
           nav={switchPage}
           basicInfo={basicInfo}
-          scheduleNumber={scheduleNumber} /> : null }
-        { currentPage == 'sections' ? <PageSections nav={switchPage} /> : null }
-        { currentPage == 'section' ? <PageSection nav={switchPage} lawTitle={lawTitle} /> : null }
+          scheduleNumber={scheduleNumber} /> : null}
+        {currentPage == 'sections' ? <PageSections nav={switchPage} /> : null}
+        {currentPage == 'section' ? <PageSection nav={switchPage} lawTitle={lawTitle} /> : null}
       </View>
       {/* Ad container -  actual height*/}
       <View style={{ height: 50, backgroundColor: 'red' }}>
