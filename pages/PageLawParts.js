@@ -4,6 +4,7 @@ import * as Database from '../database';
 
 const PageLawParts = (props) => {
 
+  // parts are loaded in PageLawBasicInfo.js
   useEffect(() => {
     Database.fetchParts(2014, 38)
     .then(data => {

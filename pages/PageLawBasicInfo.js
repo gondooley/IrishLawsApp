@@ -5,11 +5,8 @@ import * as Database from '../database';
 const PageLawBasicInfo = (props) => {
 
   useEffect(() => {
-    Database.fetchBasicInfo(2014, 38)
+    Database.fetchBasicInfo(props.basicInfo.year, props.basicInfo.numberInYear)
       .then(data => {
-        let id = data["_id"];
-        data["year"] = String(id).substring(0, 4);
-        data["numberInYear"] = String(id).substring(5);
         props.setBasicInfo(data);
       })
       .catch((error) => {

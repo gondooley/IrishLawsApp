@@ -77,7 +77,7 @@ const App = () => {
   // the string is copied at certain times to prevent automatic updates outside the search box
   const [searchTextCopy, setSearchTextCopy] = useState('');
   const [lawTitle, setLawTitle] = useState('');
-  const [basicInfo, setBasicInfo] = useState({ 'year': -1 });
+  const [basicInfo, setBasicInfo] = useState({ 'year': -1, 'numberInYear': -1 });
   const [parts, setParts] = useState({});
   const [chapters, setChapters] = useState({});
   const [scheduleNumber, setScheduleNumber] = useState(0);
@@ -99,6 +99,12 @@ const App = () => {
   function setYear(year) {
     let tempBasicInfo = basicInfo;
     tempBasicInfo.year = year;
+    setBasicInfo(tempBasicInfo);
+  }
+
+  function setNumberInYear(numberInYear) {
+    let tempBasicInfo = basicInfo;
+    tempBasicInfo.numberInYear = numberInYear;
     setBasicInfo(tempBasicInfo);
   }
 
@@ -142,7 +148,8 @@ const App = () => {
           nav={switchPage}
           searchText={searchTextCopy}
           setLawTitle={setLawTitle} /> : null}
-        {currentPage == 'basicInfo' ? <PageLawBasicInfo nav={switchPage}
+        {currentPage == 'basicInfo' ? <PageLawBasicInfo
+          nav={switchPage}
           basicInfo={basicInfo}
           setBasicInfo={setBasicInfo} /> : null}
         {currentPage == 'chapters' ? <PageLawPartChapters nav={switchPage} chapters={chapters} /> : null}
@@ -155,7 +162,10 @@ const App = () => {
           nav={switchPage}
           basicInfo={basicInfo}
           setScheduleNumber={setScheduleNumber} /> : null}
-        {currentPage == 'lawsInYear' ? <PageLawsInYear nav={switchPage} year={basicInfo.year} /> : null}
+        {currentPage == 'lawsInYear' ? <PageLawsInYear
+          nav={switchPage}
+          year={basicInfo.year}
+          setNumberInYear={setNumberInYear} /> : null}
         {currentPage == 'schedule' ? <PageSchedule
           nav={switchPage}
           basicInfo={basicInfo}

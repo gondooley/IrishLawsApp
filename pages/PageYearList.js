@@ -11,7 +11,6 @@ const PageYearList = (props) => {
   const years = [...Array(finishYear - startYear + 1).keys()].map(x => x + startYear).reverse();
 
   function goToYear(year) {
-    console.log('keys' + Object.keys(year));
     props.setYear(JSON.stringify(year));
     props.nav('lawsInYear');
   }
@@ -20,8 +19,7 @@ const PageYearList = (props) => {
     <Pressable onPress={() => goToYear(item)}
       style={{
         justifyContent: 'center',
-        alignContent: 'center',
-        flexDirection: 'row',
+        alignItems: 'center',
         flex: 1,
         height: squareSize
       }}>
