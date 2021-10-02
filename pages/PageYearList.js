@@ -1,22 +1,42 @@
 import React from 'react';
-import { Button, Text } from 'react-native';
-
-// Create an array with all the years as integers
-// ([...Array(finishYear - startYear + 1).keys()].map(x => x + startYear)
+import { Dimensions, FlatList, Pressable, Text, View } from 'react-native';
 
 const PageYearList = (props) => {
+  const deviceWidth = Dimensions.get('window').width;
+  const numColumns = Math.floor(deviceWidth / 80);
+  const squareSize = deviceWidth / numColumns;
+  const startYear = 1922;
+  const finishYear = new Date().getFullYear();
+  // Create an array with all the years as integers
+  const years = [...Array(finishYear - startYear + 1).keys()].map(x => x + startYear).reverse();
+
+  function goToYear(year) {
+    console.log('keys' + Object.keys(year));
+    props.setYear(JSON.stringify(year));
+    props.nav('lawsInYear');
+  }
+
+  const renderItem = ({ item }) => (
+    <Pressable onPress={() => goToYear(item)}
+      style={{
+        justifyContent: 'center',
+        alignContent: 'center',
+        flexDirection: 'row',
+        flex: 1,
+        height: squareSize
+      }}>
+      <Text>{item}</Text>
+    </Pressable>
+  );
+
   return (
-    <>
-      <Text style={{color: 'white'}}>
-        Year List
-      </Text>
-      <Button 
-        onPress={() => {
-          props.nav('lawsInYear');
-        }}
-        title="Choose a particular year"
-        color="#841584"/>
-    </>
+    <View style={{ flexDirection: 'column', width: '100%' }}>
+      <FlatList
+        renderItem={renderItem}
+        data={years}
+        numColumns={numColumns}
+        style={{ width: '100%' }} />
+    </View>
   );
 }
 

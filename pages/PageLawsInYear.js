@@ -5,7 +5,7 @@ import * as Database from '../database'
 const PageLawsInYear = (props) => {
   const [titlesInYear, setTitlesInYear] = useState('');
   useEffect(() => {
-    Database.fetchLawTitles(2021)
+    Database.fetchLawTitles(props.year)
       .then(data => setTitlesInYear(JSON.stringify(data)))
       .catch((error) => {
         setTitlesInYear('Error: ' + error);
@@ -21,7 +21,7 @@ const PageLawsInYear = (props) => {
         title="A particular law"
         color="#841584" />
       <Text style={{ color: 'white' }}>
-        Laws in 2021
+        Laws in {props.year}
       </Text>
       <Text style={{ color: 'black' }}>
         {titlesInYear}

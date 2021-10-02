@@ -77,7 +77,7 @@ const App = () => {
   // the string is copied at certain times to prevent automatic updates outside the search box
   const [searchTextCopy, setSearchTextCopy] = useState('');
   const [lawTitle, setLawTitle] = useState('');
-  const [basicInfo, setBasicInfo] = useState({});
+  const [basicInfo, setBasicInfo] = useState({ 'year': -1 });
   const [parts, setParts] = useState({});
   const [chapters, setChapters] = useState({});
   const [scheduleNumber, setScheduleNumber] = useState(0);
@@ -94,6 +94,12 @@ const App = () => {
       setToolbarTitle('Irish Laws');
     }
     setCurrentPage(pageName);
+  }
+
+  function setYear(year) {
+    let tempBasicInfo = basicInfo;
+    tempBasicInfo.year = year;
+    setBasicInfo(tempBasicInfo);
   }
 
   useEffect(() => {
@@ -131,7 +137,7 @@ const App = () => {
       />
       <View style={{ flex: 1 }}>
         {currentPage == 'home' ? <PageHome setSearchActivated={setSearchActivated} nav={switchPage} /> : null}
-        {currentPage == 'years' ? <PageYearList nav={switchPage} /> : null}
+        {currentPage == 'years' ? <PageYearList nav={switchPage} setYear={setYear} /> : null}
         {currentPage == 'defns' ? <PageDefns
           nav={switchPage}
           searchText={searchTextCopy}
@@ -149,7 +155,7 @@ const App = () => {
           nav={switchPage}
           basicInfo={basicInfo}
           setScheduleNumber={setScheduleNumber} /> : null}
-        {currentPage == 'lawsInYear' ? <PageLawsInYear nav={switchPage} /> : null}
+        {currentPage == 'lawsInYear' ? <PageLawsInYear nav={switchPage} year={basicInfo.year} /> : null}
         {currentPage == 'schedule' ? <PageSchedule
           nav={switchPage}
           basicInfo={basicInfo}
