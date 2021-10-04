@@ -55,6 +55,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { BackHandler, Modal, Pressable, SafeAreaView, Text, TouchableWithoutFeedbackBase, View } from 'react-native';
+import { useBackHandler } from '@react-native-community/hooks'
 import PageHome from './pages/PageHome';
 import PageYearList from './pages/PageYearList';
 import PageDefns from './pages/PageDefns';
@@ -78,13 +79,21 @@ const App = () => {
   const [searchTextCopy, setSearchTextCopy] = useState('');
   const [lawTitle, setLawTitle] = useState('');
   const [basicInfo, setBasicInfo] = useState({ 'year': -1, 'numberInYear': -1 });
-  const [parts, setParts] = useState({});
-  const [chapters, setChapters] = useState({});
+  const [partsData, setPartsData] = useState({});
+  const [selectedPart, setSelectedPart] = useState({});
+  const [selectedChapterNumberAsString, setSelectedChapterNumberAsString] = useState('');
+  const [sectionNumberFirstSelected, setSectionNumberFirstSelected] = useState(-1);
+  const [sectionNumberFirstBeyond, setSectionNumberFirstBeyond] = useState(-1);
+  const [selectedSectionNumber, setSelectedSectionNumber] = useState(-1);
   const [scheduleNumber, setScheduleNumber] = useState(0);
-  const breadCrumbs = ['home'];
+  const [breadcrumbs, setBreadcrumbs] = useState(['home']);
 
-  function switchPage(pageName) {
-    breadCrumbs.push(pageName);
+  useEffect(() => {
+    console.log('breadcrumbs changed: ' + breadcrumbs);
+  }, [breadcrumbs]);
+
+  function switchPage(pageName, possibleBreadcrumbs) {
+    console.log('About to switch page: ' + pageName);
     if (pageName == 'defns') {
       setSearchActivated(false);
       setSearchTextCopy((' ' + searchText).slice(1));
@@ -93,6 +102,18 @@ const App = () => {
     } else {
       setToolbarTitle('Irish Laws');
     }
+    var temp;
+    // A desired breadcrumbs array has been passed.
+    // This avoids race conditions between breadcrumb settings
+    // when, eg, back button is pressed
+    if (typeof possibleBreadcrumbs == 'object') {
+      temp = possibleBreadcrumbs;
+    } else {
+      temp = [...breadcrumbs];
+    }
+    temp.push(pageName);
+    setBreadcrumbs(temp);
+    console.log('breadcrumbs updated: ' + temp);
     setCurrentPage(pageName);
   }
 
@@ -108,24 +129,28 @@ const App = () => {
     setBasicInfo(tempBasicInfo);
   }
 
-  useEffect(() => {
-    const backAction = () => {
-      console.log('backAction invoked');
-      if (breadCrumbs.length == 1) {
-        return false;
-      }
-      breadCrumbs.pop();
-      switchPage(breadCrumbs.pop());
-      return true;
-    };
+  function actualCurrentPage() {
+    return currentPage;
+  }
 
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      backAction
-    );
-
-    return () => backHandler.remove();
-  }, []);
+useBackHandler(() => {
+  if (breadcrumbs.length > 1) {
+    console.log('Entered useBackHander()');
+    console.log('breadCrumbs: ' + breadcrumbs);
+    let temp = [...breadcrumbs];
+    console.log('temp set: ' + temp);
+    temp.pop(); // current page is gone
+    let previousPage = temp.pop(); // previous page will be reloaded
+    console.log('temp popped: ' + temp)
+    // previousPage will be added back onto the temp
+    // breadcrumbs in the switchPage function,
+    // when it becomes the currentPage again
+    // (Avoid setting breadcrumbs twice, causing race conditions)
+    switchPage(previousPage, temp);
+    return true
+  }
+  return false
+})
 
   const [isFontSizeModalVisible, setIsFontSizeModalVisible] = useState('false');
 
@@ -151,13 +176,28 @@ const App = () => {
         {currentPage == 'basicInfo' ? <PageLawBasicInfo
           nav={switchPage}
           basicInfo={basicInfo}
-          setBasicInfo={setBasicInfo} /> : null}
-        {currentPage == 'chapters' ? <PageLawPartChapters nav={switchPage} chapters={chapters} /> : null}
+          setBasicInfo={setBasicInfo}
+          setParts={setPartsData}
+          setSelectedPart={setSelectedPart}
+          setSelectedChapterNumberAsString={setSelectedChapterNumberAsString}
+          setSectionNumberFirstSelected={setSectionNumberFirstSelected}
+          setSectionNumberFirstBeyond={setSectionNumberFirstBeyond} /> : null}
+        {currentPage == 'chapters' ? <PageLawPartChapters
+          nav={switchPage}
+          basicInfo={basicInfo}
+          partsData={partsData}
+          selectedPart={selectedPart}
+          setSelectedChapterNumberAsString={setSelectedChapterNumberAsString}
+          setSectionNumberFirstSelected={setSectionNumberFirstSelected}
+          setSectionNumberFirstBeyond={setSectionNumberFirstBeyond} /> : null}
         {currentPage == 'parts' ? <PageLawParts
           nav={switchPage}
-          setParts={setParts}
-          partsData={parts}
-          setChapters={setChapters} /> : null}
+          basicInfo={basicInfo}
+          partsData={partsData}
+          setSelectedPart={setSelectedPart}
+          setSelectedChapterNumberAsString={setSelectedChapterNumberAsString}
+          setSectionNumberFirstSelected={setSectionNumberFirstSelected}
+          setSectionNumberFirstBeyond={setSectionNumberFirstBeyond} /> : null}
         {currentPage == 'schedules' ? <PageLawSchedules
           nav={switchPage}
           basicInfo={basicInfo}
@@ -170,7 +210,14 @@ const App = () => {
           nav={switchPage}
           basicInfo={basicInfo}
           scheduleNumber={scheduleNumber} /> : null}
-        {currentPage == 'sections' ? <PageSections nav={switchPage} /> : null}
+        {currentPage == 'sections' ? <PageSections
+          nav={switchPage}
+          basicInfo={basicInfo}
+          selectedPart={selectedPart}
+          selectedChapterNumberAsString={selectedChapterNumberAsString}
+          sectionNumberFirstSelected={sectionNumberFirstSelected}
+          sectionNumberFirstBeyond={sectionNumberFirstBeyond}
+          setSelectedSectionNumber={setSelectedSectionNumber} /> : null}
         {currentPage == 'section' ? <PageSection nav={switchPage} lawTitle={lawTitle} /> : null}
       </View>
       {/* Ad container -  actual height*/}
