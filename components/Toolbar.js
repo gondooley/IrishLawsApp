@@ -3,26 +3,13 @@ import { Image, Pressable, Text, TextInput, View } from 'react-native';
 
 const Toolbar = (props) => {
 
-  const [inputShowing, setInputShowing] = useState(false);
-
-  useEffect(() => {
-    console.log('Toolbar.js detects search activated changed to ' + props.searchActivated);
-    setInputShowing(props.searchActivated);
-  }, [props.searchActivated]);
-
-  function searchRequest() {
-    if (props.searchText == '') return;
-    props.nav('defns');
-  }
-
   return (
     <View style={{ height: 56, flexDirection: 'row', justifyContent: 'space-between', elevation: 4, padding: 4 }} >
-      {inputShowing
+      {props.searchInputActivated
         ?
         <View style={{ flexDirection: 'row', flex: 1 }}>
           <Pressable onPress={() => {
-            setInputShowing(false);
-            props.setSearchActivated(false);
+            props.setSearchInputActivated(false);
           }}>
             <View style={{ width: 56, flex: 1, justifyContent: 'center', alignItems: 'center' }}>
               <Image source={require('../images/left_arrow.png')}
@@ -32,6 +19,7 @@ const Toolbar = (props) => {
           <View style={{ flex: 1, backgroundColor: 'white', flexDirection: 'row' }}>
             <TextInput
               autoFocus={true}
+              autoCapitalize='none'
               onChangeText={text => props.setSearchText(text)}
               value={props.searchText}
               placeholder='Type here'
@@ -43,7 +31,7 @@ const Toolbar = (props) => {
                 color: 'black'
               }}
             />
-            <Pressable onPress={() => searchRequest()}>
+            <Pressable onPress={() => props.searchRequest()}>
               <View style={{ width: 48, flex: 1, justifyContent: 'center' }}>
                 <Image source={require('../images/ic_search.png')}
                   style={{ width: 32, height: 32 }} />
@@ -61,9 +49,9 @@ const Toolbar = (props) => {
         </View>
       }
       <View style={{ flexDirection: 'row' }}>
-        {inputShowing
+        {props.searchInputActivated
           ? null : (
-            <Pressable onPress={() => setInputShowing(true)}>
+            <Pressable onPress={() => props.setSearchInputActivated(true)}>
               <View style={{ width: 48, flex: 1, justifyContent: 'center' }}>
                 <Image source={require('../images/ic_search.png')}
                   style={{ width: 32, height: 32 }} />

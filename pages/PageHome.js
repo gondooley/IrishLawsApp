@@ -16,13 +16,14 @@ const PageHome = (props) => {
   }
 
   return (
-    // top container
+    // activate search
     <View style={{ flexDirection: 'column', justifyContent: 'space-between', flex: 1 }}>
       <HomeButton onPress={() => {
-        props.setSearchActivated(true);
-        console.log("In PageHome props.setSearchActivated is of type:"
-          + (typeof props.setSearchActivated));
-        console.log(props.setSearchActivated.toString());
+        if (props.searchInputActivated == false) {
+          props.setSearchInputActivated(true);
+        } else {
+          props.searchRequest();
+        }
       }}>
         Search for definitions in Irish Laws
       </HomeButton>
@@ -38,19 +39,6 @@ const PageHome = (props) => {
         Choose law by year
       </HomeButton>
 
-      {/* <Text style={{color: 'white'}}>
-        Home
-      </Text>
-      <Button 
-        onPress={() => {
-          props.nav('years');
-        }}
-        title="Year List"
-        color="#841584"/>
-      <Button 
-        onPress={() => props.nav('defns')}
-        title="Definition results"
-        color="#841584"/> */}
     </View>
   );
 }

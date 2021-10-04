@@ -70,7 +70,7 @@ import PageSection from './pages/PageSection';
 import Toolbar from './components/Toolbar';
 
 const App = () => {
-  const [searchActivated, setSearchActivated] = useState(false);
+  const [searchInputActivated, setSearchInputActivated] = useState(false);
 
   const [currentPage, setCurrentPage] = useState('home');
   const [toolbarTitle, setToolbarTitle] = useState('Irish Laws');
@@ -88,16 +88,10 @@ const App = () => {
   const [scheduleNumber, setScheduleNumber] = useState(0);
   const [breadcrumbs, setBreadcrumbs] = useState(['home']);
 
-  useEffect(() => {
-    console.log('breadcrumbs changed: ' + breadcrumbs);
-  }, [breadcrumbs]);
-
   function switchPage(pageName, possibleBreadcrumbs) {
-    console.log('About to switch page: ' + pageName);
     if (pageName == 'defns') {
-      setSearchActivated(false);
+      setSearchInputActivated(false);
       setSearchTextCopy((' ' + searchText).slice(1));
-      console.log("Search text to be sent: " + searchTextCopy);
       setToolbarTitle('Search results');
     } else {
       setToolbarTitle('Irish Laws');
@@ -129,28 +123,27 @@ const App = () => {
     setBasicInfo(tempBasicInfo);
   }
 
-  function actualCurrentPage() {
-    return currentPage;
+  function searchRequest() {
+    if (searchText == '') return;
+    switchPage('defns');
   }
 
-useBackHandler(() => {
-  if (breadcrumbs.length > 1) {
-    console.log('Entered useBackHander()');
-    console.log('breadCrumbs: ' + breadcrumbs);
-    let temp = [...breadcrumbs];
-    console.log('temp set: ' + temp);
-    temp.pop(); // current page is gone
-    let previousPage = temp.pop(); // previous page will be reloaded
-    console.log('temp popped: ' + temp)
-    // previousPage will be added back onto the temp
-    // breadcrumbs in the switchPage function,
-    // when it becomes the currentPage again
-    // (Avoid setting breadcrumbs twice, causing race conditions)
-    switchPage(previousPage, temp);
-    return true
-  }
-  return false
-})
+  useBackHandler(() => {
+    if (breadcrumbs.length > 1) {
+      let temp = [...breadcrumbs];
+      temp.pop(); // current page is gone
+      let previousPage = temp.pop(); // previous page will be reloaded
+      /*
+       * previousPage will be added back onto the temp
+       * breadcrumbs in the switchPage function,
+       * when it becomes the currentPage again
+       * (Avoid setting breadcrumbs twice, causing race conditions)
+       */
+      switchPage(previousPage, temp);
+      return true
+    }
+    return false
+  })
 
   const [isFontSizeModalVisible, setIsFontSizeModalVisible] = useState('false');
 
@@ -159,15 +152,19 @@ useBackHandler(() => {
     <SafeAreaView style={{ flex: 1, flexDirection: 'column', backgroundColor: '#339999' }}>
       <Toolbar
         modalCallback={setIsFontSizeModalVisible}
+        searchInputActivated={searchInputActivated}
+        setSearchInputActivated={setSearchInputActivated}
         searchText={searchText}
         setSearchText={setSearchText}
-        nav={switchPage}
-        searchActivated={searchActivated}
-        setSearchActivated={setSearchActivated}
+        searchRequest={searchRequest}
         title={toolbarTitle}
       />
       <View style={{ flex: 1 }}>
-        {currentPage == 'home' ? <PageHome setSearchActivated={setSearchActivated} nav={switchPage} /> : null}
+        {currentPage == 'home' ? <PageHome
+          nav={switchPage}
+          searchInputActivated={searchInputActivated}
+          setSearchInputActivated={setSearchInputActivated}
+          searchRequest={searchRequest} /> : null}
         {currentPage == 'years' ? <PageYearList nav={switchPage} setYear={setYear} /> : null}
         {currentPage == 'defns' ? <PageDefns
           nav={switchPage}
