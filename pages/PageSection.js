@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Text } from 'react-native';
+import HTML from '../components/HTML'
 import * as Database from '../database';
 
 const PageSection = (props) => {
 
   const [section, setSection] = useState('');
   useEffect(() => {
-    Database.fetchSection(1951, 1, 1)
-      .then(data => setSection(JSON.stringify(data)))
+    Database.fetchSection(props.basicInfo.year, props.basicInfo.numberInYear, props.selectedSectionNumber)
+      .then(data => setSection(data.html))
       .catch((error) => {
         setSection('Error: ' + error);
       });
@@ -16,17 +17,12 @@ const PageSection = (props) => {
   return (
     <>
       <Text style={{ color: 'white' }}>
-        Law title passed in
-      </Text>
-      <Text style={{ color: 'black' }}>
-        {props.lawTitle}
+        {props.basicInfo.title}
       </Text>
       <Text style={{ color: 'white' }}>
-        Particular section (Section 1 in Number 1 of 1951)
+        Particular section
       </Text>
-      <Text style={{ color: 'black' }}>
-        {section}
-      </Text>
+      <HTML source={section} />
     </>
   );
 }

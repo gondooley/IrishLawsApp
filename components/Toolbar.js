@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Image, Pressable, Text, TextInput, View } from 'react-native';
 
 const Toolbar = (props) => {

@@ -77,6 +77,10 @@ const App = () => {
   const [searchText, setSearchText] = useState('');
   // the string is copied at certain times to prevent automatic updates outside the search box
   const [searchTextCopy, setSearchTextCopy] = useState('');
+  const [exactResults, setExactResults] = useState(undefined);
+  const [partialResults, setPartialResults] = useState(undefined);
+  const [usageResults, setUsageResults] = useState(undefined);
+  const [allResults, setAllResults] = useState(undefined);
   const [lawTitle, setLawTitle] = useState('');
   const [basicInfo, setBasicInfo] = useState({ 'year': -1, 'numberInYear': -1 });
   const [partsData, setPartsData] = useState({});
@@ -107,7 +111,6 @@ const App = () => {
     }
     temp.push(pageName);
     setBreadcrumbs(temp);
-    console.log('breadcrumbs updated: ' + temp);
     setCurrentPage(pageName);
   }
 
@@ -125,6 +128,10 @@ const App = () => {
 
   function searchRequest() {
     if (searchText == '') return;
+    setExactResults(undefined);
+    setPartialResults(undefined);
+    setUsageResults(undefined);
+    setAllResults(undefined);
     switchPage('defns');
   }
 
@@ -169,7 +176,14 @@ const App = () => {
         {currentPage == 'defns' ? <PageDefns
           nav={switchPage}
           searchText={searchTextCopy}
-          setLawTitle={setLawTitle} /> : null}
+          exactResulte={exactResults}
+          setExactResults={setExactResults}
+          partialResults={partialResults}
+          setPartialResults={setPartialResults}
+          usageResults={usageResults}
+          setUsageResults={setUsageResults}
+          allResults={allResults}
+          setAllResults={setAllResults} /> : null}
         {currentPage == 'basicInfo' ? <PageLawBasicInfo
           nav={switchPage}
           basicInfo={basicInfo}
@@ -215,7 +229,10 @@ const App = () => {
           sectionNumberFirstSelected={sectionNumberFirstSelected}
           sectionNumberFirstBeyond={sectionNumberFirstBeyond}
           setSelectedSectionNumber={setSelectedSectionNumber} /> : null}
-        {currentPage == 'section' ? <PageSection nav={switchPage} lawTitle={lawTitle} /> : null}
+        {currentPage == 'section' ? <PageSection
+          nav={switchPage}
+          basicInfo={basicInfo}
+          selectedSectionNumber={selectedSectionNumber} /> : null}
       </View>
       {/* Ad container -  actual height*/}
       <View style={{ height: 50, backgroundColor: 'red' }}>

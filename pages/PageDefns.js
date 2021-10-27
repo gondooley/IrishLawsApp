@@ -5,85 +5,65 @@ import * as Database from '../database';
 
 const PageDefns = (props) => {
 
-  const [exactsHeading, setExactsHeading] = useState('Loading ...');
-  const [partialsHeading, setPartialsHeading] = useState('Loading ...');
-  const [usagesHeading, setUsagesHeading] = useState('Loading ...');
-  const [exactResults, setExactResults] = useState(undefined);
-  const [partialResults, setPartialResults] = useState(undefined);
-  const [usageResults, setUsageResults] = useState(undefined);
-  const [allResults, setAllResults] = useState(undefined);
-  const [allResultsAreIn, setAllResultsAreIn] = useState(false);
-
-
   useEffect(() => {
-    if (typeof exactResults == 'undefined') {
-      Database.fetchExactDefns(props.searchText)
-        .then(data => {
-          loadResults(data, setExactsHeading,
-            'No exact definitions found',
-            'A single exact definition found',
-            ' exact definitions found',
-            'Exact', setExactResults);
+    console.log(props.exactResults + "/" + props.partialResults + "/" + props.usageResults);
+    if (typeof props.allResults == 'undefined') {
+      Database.fetchDefns(props.searchText)
+        .then(searchResults => {
+          let exactResults = convertFetchedDataIntoSectionListData
+            (searchResults["exacts"],
+              'No exact definitions found',
+              'A single exact definition found',
+              ' exact definitions found');
+          let partialResults = convertFetchedDataIntoSectionListData
+            (processPartialData(searchResults["partials"]),
+              'No partial matches to defined terms found',
+              'A single partial match to defined terms found',
+              ' partial matches to defined terms found');
+          // The wording of the usages heading depends on the number of words in the searchText
+          var altText;
+          if (String(props.searchText).split(' ').length == 1) {
+            altText = 'the entered word';
+          } else {
+            altText = 'one or more of the entered words';
+          }
+          altText = " of " + altText + " found in laws";
+          let usageResults = convertFetchedDataIntoSectionListData
+          (searchResults["usages"],
+            'No usages' + altText,
+            'A single usage' + altText,
+            ' usages' + altText);
+          props.setAllResults([exactResults, partialResults, usageResults]);
         }).catch((error) => { console.log('Error: ' + error); });
     }
-    if (typeof partialResults == 'undefined') {
-      Database.fetchPartialDefns(props.searchText)
-        .then(data => {
-          loadResults(data, setPartialsHeading,
-            'No partial matches to defined terms found',
-            'A single partial match to defined terms found',
-            ' partial matches to defined terms found',
-            'Partial', setPartialResults);
-        }).catch((error) => { console.log('Error: ' + error); });
-    }
-    if (typeof usageResults == 'undefined') {
-      Database.fetchUsages(props.searchText)
-        .then(data => {
-          loadResults(data, setUsagesHeading,
-            'No usages of one or more of the entered words found in laws',
-            'A single usage of one or more of the entered words found in laws',
-            ' usages of one or more of the entered words found in laws',
-            'Other usage', setUsageResults);
-        }).catch((error) => { console.log('Error: ' + error); });
-    }
-  }, []);
+  }, [props.allResults]);
 
-  /**
-   * Waiting for all sections to be in before setting the SectionList data 
-   */
-  useEffect(() => {
-    if (typeof allResults == 'undefined'
-    && typeof exactResults != 'undefined'
-    && typeof partialResults != 'undefined'
-    && typeof usageResults != 'undefined') {
-      setAllResults([exactResults, partialResults, usageResults]);
-    }
-  }, [exactResults, partialResults, usageResults]);
+  function processPartialData(data) {
+    var processedData = [];
+    data.forEach(partialTerm => {
+      processedData.push("heading:" + partialTerm[["_id"]]);
+      processedData.push(...partialTerm["refs"]);
+    });
+    return { "refs": processedData };
+  }
 
-  useEffect(() => {
-    if (typeof allResults != 'undefined') {
-      setAllResultsAreIn(true);
-    }
-  }, [allResults]);
-
-  function loadResults(data, headingSetter,
-    noneHeading, singleHeading, multipleHeading,
-    sectionTitle, sectionResultsSetter) {
+  function convertFetchedDataIntoSectionListData
+    (data, noneHeading, singleHeading, multipleHeading) {
+    var sectionResults;
     let refs = data["refs"];
-    let sectionResults = { "title": sectionTitle };
     if (typeof refs == "undefined") {
-      headingSetter(noneHeading);
+      sectionResults = { "title": noneHeading };
       sectionResults["data"] = [];
     } else {
-      sectionResults["data"] = refs;
       let sectionCount = refs.length;
       if (sectionCount == 1) {
-        headingSetter(singleHeading);
+        sectionResults = { "title": singleHeading }
       } else {
-        headingSetter(sectionCount + multipleHeading);
+        sectionResults = { "title": sectionCount + multipleHeading };
       }
+      sectionResults["data"] = refs;
     }
-    sectionResultsSetter(sectionResults);
+    return sectionResults;
   }
 
   const InterListBoundary = () => {
@@ -93,17 +73,43 @@ const PageDefns = (props) => {
   }
 
   const MySectionList = () => {
+    console.log("Returning MySectionList");
     return (
       <SectionList
-        sections={allResults}
+        sections={typeof props.allResults == "undefined" ? [] : props.allResults}
         keyExtractor={(item, index) => item + index}
-        renderItem={({ item, index, section }) =>
-          <ResultsListItem item={item} index={index} section={section} />}
+        renderItem={({ item, index, section }) => {
+          // Not needed
+          // let year = item.substring(0, 4);
+
+          var text;
+          //check if partial result heading
+          if (item.substring(0, 7) == 'heading') {
+            text = item;
+          } else {
+            // Skip past number in year
+            let numberInYear = '';
+            var index = 5; //skipping year
+            for (; item[index] != '-'; index++) {
+              numberInYear += item.substr(index, 1);
+            }
+
+            //extract sectionNumber and title
+            let remainingText = item.substr(index + 1);
+            let dividerIndex = remainingText.indexOf(':');
+            let sectionNumber = remainingText.substring(0, dividerIndex);
+            let title = remainingText.substring(dividerIndex + 1);
+            let isSchedule = item.startsWith('schedule');
+            if (isSchedule) {
+              sectionNumber = sectionNumber.substr(8);
+            }
+            text = title + ", section " + sectionNumber;
+          }
+          return (<ResultsListItem text={text} />);
+        }}
         renderSectionHeader={({ section: { title } }) => (
           <Text style={{ fontWeight: 'bold', color: 'orange', alignContent: 'flex-start' }}>
-            {title == 'Exact' ? exactsHeading : null}
-            {title == 'Partial' ? partialsHeading : null}
-            {title == 'Other usage' ? usagesHeading : null}
+            {title}
           </Text>
         )}
         SectionSeparatorComponent={InterListBoundary}
@@ -120,7 +126,7 @@ const PageDefns = (props) => {
       <Text style={{ fontWeight: 'bold', color: 'white', alignContent: 'center' }}>
         {props.searchText}
       </Text>
-      {allResultsAreIn ? <MySectionList /> : <Text>LOADING...</Text>}
+      {typeof props.allResults == "undefined" ? <Text>LOADING...</Text> : <MySectionList />}
     </SafeAreaView>
   );
 }

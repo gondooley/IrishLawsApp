@@ -42,11 +42,17 @@ const PageLawPartChapters = (props) => {
 
 
           }
+          var text;
+          if (Object.keys(props.selectedPart.chapters[item]).includes('title')) {
+            text = "Chapter " + item + ": " + props.selectedPart.chapters[item]['title'];
+          } else {
+            text = "Chapter " + item;
+          }
           return (
             <Pressable style={{ minHeight: 40, justifyContent: 'center' }}
               onPress={onPressAction}>
               <Text>
-                Chapter {item}: {props.selectedPart.chapters[item]['title']}
+                {text}
               </Text>
             </Pressable>
           );

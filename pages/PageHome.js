@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, Pressable, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, Text, View } from 'react-native';
 
 const PageHome = (props) => {
 
@@ -16,31 +16,31 @@ const PageHome = (props) => {
   }
 
   return (
-    // activate search
-    <View style={{ flexDirection: 'column', justifyContent: 'space-between', flex: 1 }}>
-      <HomeButton onPress={() => {
-        if (props.searchInputActivated == false) {
-          props.setSearchInputActivated(true);
-        } else {
-          props.searchRequest();
-        }
-      }}>
-        Search for definitions in Irish Laws
-      </HomeButton>
-      <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
-        <Image source={require('../images/irish_laws_icon.png')}
-          style={{
-            height: '85%',
-            width: '85%',
-            resizeMode: 'contain',
-          }} />
+    <ScrollView contentContainerStyle={{ flex: 1 }}>
+      <View style={{ flexDirection: 'column', justifyContent: 'space-between', flex: 1 }}>
+        {/*activate search*/}
+        <HomeButton onPress={() => {
+          if (props.searchInputActivated == false) {
+            props.setSearchInputActivated(true);
+          } else {
+            props.searchRequest();
+          }
+        }}>
+          Search for definitions in Irish Laws
+        </HomeButton>
+        <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
+          <Image source={require('../images/irish_laws_icon.png')}
+            style={{
+              height: '85%',
+              width: '85%',
+              resizeMode: 'contain',
+            }} />
+        </View>
+        <HomeButton onPress={() => props.nav('years')} style={{ justifyContent: 'center', alignItems: 'center' }}>
+          Choose law by year
+        </HomeButton>
       </View>
-      <HomeButton onPress={() => props.nav('years')} style={{ justifyContent: 'center', alignItems: 'center' }}>
-        Choose law by year
-      </HomeButton>
-
-    </View>
-  );
+    </ScrollView>);
 }
 
 export default PageHome;
