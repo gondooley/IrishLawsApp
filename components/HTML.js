@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { View } from "react-native";
 import WebView from 'react-native-webview';
 
 const HTML = (props) => {
 
-  const [editedSource, setEditedSource] = useState('');
+  const [editedSource, setEditedSource] = useState('Loading...');
 
   // edit once only, when page first loads (hence empty array for second argument)
   useEffect(() => {
@@ -15,12 +14,9 @@ const HTML = (props) => {
     let pos = html.indexOf(linkIndicator, 0);
 
     while (pos > -1) {
-      console.log("Position: " + pos);
       // 1 beyond the end of the link anchor
       let openingTagEndIndex = html.indexOf('>', pos) + 1;
-      console.log(html.substring(pos, openingTagEndIndex));
       let closingTagIndex = html.indexOf('</a>', openingTagEndIndex);
-      console.log(html.substring(closingTagIndex, closingTagIndex + 5));
         // before opening tag
       html = html.substring(0, pos - 1)
         // element inner html
@@ -30,7 +26,7 @@ const HTML = (props) => {
         pos = html.indexOf(linkIndicator, pos + 1);
     }
     setEditedSource(html);
-  }, []);
+  }, [props.source]);
 
   return (
     <WebView

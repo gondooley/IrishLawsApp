@@ -53,9 +53,9 @@
 
 // TODO: Android Irish Laws app - ViewModelProviders is now deprecated
 
-import React, { useEffect, useState } from 'react';
-import { BackHandler, Modal, Pressable, SafeAreaView, Text, TouchableWithoutFeedbackBase, View } from 'react-native';
-import { useBackHandler } from '@react-native-community/hooks'
+import React, { useState } from 'react';
+import { Modal, Pressable, SafeAreaView, Text, View } from 'react-native';
+import { useBackHandler } from '@react-native-community/hooks';
 import PageHome from './pages/PageHome';
 import PageYearList from './pages/PageYearList';
 import PageDefns from './pages/PageDefns';
@@ -68,6 +68,8 @@ import PageSchedule from './pages/PageSchedule';
 import PageSections from './pages/PageSections';
 import PageSection from './pages/PageSection';
 import Toolbar from './components/Toolbar';
+import * as Database from './database';
+import * as RomanNumerals from './romanNumerals';
 
 const App = () => {
   const [searchInputActivated, setSearchInputActivated] = useState(false);
@@ -77,21 +79,24 @@ const App = () => {
   const [searchText, setSearchText] = useState('');
   // the string is copied at certain times to prevent automatic updates outside the search box
   const [searchTextCopy, setSearchTextCopy] = useState('');
-  const [exactResults, setExactResults] = useState(undefined);
-  const [partialResults, setPartialResults] = useState(undefined);
-  const [usageResults, setUsageResults] = useState(undefined);
   const [allResults, setAllResults] = useState(undefined);
-  const [lawTitle, setLawTitle] = useState('');
-  const [basicInfo, setBasicInfo] = useState({ 'year': -1, 'numberInYear': -1 });
+  const [basicInfo, setBasicInfo] = useState({ 'year': -1, 'numberInYear': -1, 'title': '' });
   const [partsData, setPartsData] = useState({});
   const [selectedPart, setSelectedPart] = useState({});
   const [selectedChapterNumberAsString, setSelectedChapterNumberAsString] = useState('');
   const [sectionNumberFirstSelected, setSectionNumberFirstSelected] = useState(-1);
   const [sectionNumberFirstBeyond, setSectionNumberFirstBeyond] = useState(-1);
   const [selectedSectionNumber, setSelectedSectionNumber] = useState(-1);
+  const [selectedSectionTitle, setSelectedSectionTitle] = useState('');
   const [scheduleNumber, setScheduleNumber] = useState(0);
   const [breadcrumbs, setBreadcrumbs] = useState(['home']);
 
+  /**
+   * possibleBreadcrumbs are passed if there is a danger of race
+   * conditions where there might be contradictory breadCrumb trails set
+   * @param {String} pageName 
+   * @param {String[]} possibleBreadcrumbs 
+   */
   function switchPage(pageName, possibleBreadcrumbs) {
     if (pageName == 'defns') {
       setSearchInputActivated(false);
@@ -100,6 +105,106 @@ const App = () => {
     } else {
       setToolbarTitle('Irish Laws');
     }
+
+    // going from a search directly to a section, we must do some
+    // work to calculate the appropriate part and chapter, if they exist
+    if (pageName == 'section') {
+      let isSearchToSection = false;
+      // possibleBreadcrumbs has been passed to avoid race conditions
+      if (typeof possibleBreadcrumbs == 'object') {
+        if (possibleBreadcrumbs[possibleBreadcrumbs.length - 1] == 'defns') {
+          isSearchToSection = true;
+        }
+      } else {
+        if (breadcrumbs[breadcrumbs.length - 1] == 'defns') {
+          isSearchToSection = true;
+        }
+      }
+      if (isSearchToSection) {
+        Database.fetchBasicInfo(basicInfo.year, basicInfo.numberInYear)
+          .then(data => {
+            // year and numberInYear not included in fetched data
+            data["year"] = basicInfo.year;
+            data["numberInYear"] = basicInfo.numberInYear;
+            setBasicInfo(data);
+            if (data.numParts > 0) {
+              Database.fetchParts(basicInfo.year, basicInfo.numberInYear)
+                .then(partsData => {
+                  setPartsData(partsData);
+
+                  // calculate relevant part
+                  let partsArray = [];
+                  for (const key in partsData) {
+                    if (key == "_id") continue;
+                    partsArray.push({ "number": key, "data": partsData[key] });
+                  }
+                  if ("1" in partsData) {
+                    partsArray.sort((a, b) => a - b);
+                  } else if ("I" in partsData) {
+                    partsArray.sort((a, b) => (RomanNumerals.decode(a.number)
+                      - RomanNumerals.decode(b.number)));
+                  } else {
+                    console.error("Strange numbering in partsData: "
+                      + partsData);
+                  }
+                  // Loop through until suitable candidate found
+                  // arrayIndex kept outside of loop to preserve value
+                  let arrayIndex = 0
+                  // If no matches in this loop, it should end up as
+                  // the last index (partsArray.length - 1)
+                  for (; arrayIndex < partsArray.length - 2; arrayIndex++) {
+                    if (Number(partsArray[arrayIndex]["data"]["first section"]) < selectedSectionNumber
+                      && Number(partsArray[arrayIndex + 1]["data"]["first section"]) > selectedSectionNumber)
+                      break;
+                  }
+                  let partSelected = partsArray[arrayIndex]["data"];
+                  // duplicate part number inside rest of data
+                  partSelected["_id"] = partsArray[arrayIndex]["number"];
+                  setSelectedPart(partSelected);
+
+                  if (Object.keys(partSelected).includes('chapters')) {
+                    //calculate relevant chapter
+                    let chaptersArray = [];
+                    let chaptersData = partSelected.chapters;
+                    for (const key in chaptersData) {
+                      chaptersArray.push({ "number": key, "data": chaptersData[key] });
+                    }
+                    if ("1" in chaptersData) {
+                      chaptersArray.sort((a, b) => a - b);
+                    } else if ("I" in chaptersData) {
+                      chaptersArray.sort((a, b) => (RomanNumerals.decode(a.number)
+                        - RomanNumerals.decode(b.number)));
+                    } else {
+                      console.error("Strange numbering in chaptersData: "
+                        + chaptersData);
+                    }
+                    // Loop through until suitable candidate found
+                    // arrayIndex kept outside of loop to preserve value
+                    let arrayIndex = 0
+                    // If no matches in this loop, it should end up as
+                    // the last index (i.e. partsArray.length - 1)
+                    for (; arrayIndex < chaptersArray.length - 2; arrayIndex++) {
+                      if (Number(chaptersArray[arrayIndex]["data"]["first section"]) < selectedSectionNumber
+                        && Number(chaptersArray[arrayIndex + 1]["data"]["first section"]) > selectedSectionNumber)
+                        break;
+                    }
+                    setSelectedChapterNumberAsString(chaptersArray[arrayIndex]["number"]);
+                  } else {
+                    setSelectedChapterNumberAsString('');
+                  }
+                }).catch((error) => {
+                  console.error('Error getting parts: ' + error);
+                });
+            } else {
+              setPartsData({});
+            }
+          })
+          .catch((error) => {
+            props.setBasicInfo('Error: ' + error);
+          });
+      }
+    }
+
     var temp;
     // A desired breadcrumbs array has been passed.
     // This avoids race conditions between breadcrumb settings
@@ -114,6 +219,15 @@ const App = () => {
     setCurrentPage(pageName);
   }
 
+
+  function fillBasicInfo(year, numberInYear, title) {
+    let tempBasicInfo = basicInfo;
+    tempBasicInfo.year = year;
+    tempBasicInfo.numberInYear = numberInYear;
+    tempBasicInfo.title = title;
+    setBasicInfo(tempBasicInfo);
+  }
+
   function setYear(year) {
     let tempBasicInfo = basicInfo;
     tempBasicInfo.year = year;
@@ -126,11 +240,14 @@ const App = () => {
     setBasicInfo(tempBasicInfo);
   }
 
+  function setTitle(title) {
+    let tempBasicInfo = basicInfo;
+    tempBasicInfo.title = title;
+    setBasicInfo(tempBasicInfo);
+  }
+
   function searchRequest() {
     if (searchText == '') return;
-    setExactResults(undefined);
-    setPartialResults(undefined);
-    setUsageResults(undefined);
     setAllResults(undefined);
     switchPage('defns');
   }
@@ -172,18 +289,20 @@ const App = () => {
           searchInputActivated={searchInputActivated}
           setSearchInputActivated={setSearchInputActivated}
           searchRequest={searchRequest} /> : null}
-        {currentPage == 'years' ? <PageYearList nav={switchPage} setYear={setYear} /> : null}
         {currentPage == 'defns' ? <PageDefns
           nav={switchPage}
           searchText={searchTextCopy}
-          exactResulte={exactResults}
-          setExactResults={setExactResults}
-          partialResults={partialResults}
-          setPartialResults={setPartialResults}
-          usageResults={usageResults}
-          setUsageResults={setUsageResults}
           allResults={allResults}
-          setAllResults={setAllResults} /> : null}
+          setAllResults={setAllResults}
+          fillBasicInfo={fillBasicInfo}
+          setSelectedSectionNumber={setSelectedSectionNumber}
+          setScheduleNumber={setScheduleNumber} /> : null}
+        {currentPage == 'years' ? <PageYearList nav={switchPage} setYear={setYear} /> : null}
+        {currentPage == 'lawsInYear' ? <PageLawsInYear
+          nav={switchPage}
+          year={basicInfo.year}
+          setNumberInYear={setNumberInYear}
+          setTitle={setTitle} /> : null}
         {currentPage == 'basicInfo' ? <PageLawBasicInfo
           nav={switchPage}
           basicInfo={basicInfo}
@@ -213,10 +332,6 @@ const App = () => {
           nav={switchPage}
           basicInfo={basicInfo}
           setScheduleNumber={setScheduleNumber} /> : null}
-        {currentPage == 'lawsInYear' ? <PageLawsInYear
-          nav={switchPage}
-          year={basicInfo.year}
-          setNumberInYear={setNumberInYear} /> : null}
         {currentPage == 'schedule' ? <PageSchedule
           nav={switchPage}
           basicInfo={basicInfo}
@@ -228,11 +343,17 @@ const App = () => {
           selectedChapterNumberAsString={selectedChapterNumberAsString}
           sectionNumberFirstSelected={sectionNumberFirstSelected}
           sectionNumberFirstBeyond={sectionNumberFirstBeyond}
-          setSelectedSectionNumber={setSelectedSectionNumber} /> : null}
+          setSelectedSectionNumber={setSelectedSectionNumber}
+          setSelectedSectionTitle={setSelectedSectionTitle} /> : null}
         {currentPage == 'section' ? <PageSection
           nav={switchPage}
           basicInfo={basicInfo}
-          selectedSectionNumber={selectedSectionNumber} /> : null}
+          selectedPart={selectedPart}
+          selectedChapterNumberAsString={selectedChapterNumberAsString}
+          sectionNumberFirstSelected={sectionNumberFirstSelected}
+          sectionNumberFirstBeyond={sectionNumberFirstBeyond}
+          selectedSectionNumber={selectedSectionNumber}
+          selectedSectionTitle={selectedSectionTitle} /> : null}
       </View>
       {/* Ad container -  actual height*/}
       <View style={{ height: 50, backgroundColor: 'red' }}>

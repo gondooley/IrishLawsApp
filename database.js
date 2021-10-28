@@ -13,6 +13,10 @@ export async function fetchDefns(searchText) {
   return await fetchStuff(URL_CONTEXT + "all?searchTerm=" + searchText);
 }
 
+export async function fetchLawTitles(year) {
+  return await fetchById(year);
+}
+
 export async function fetchBasicInfo(year, numberInYear) {
   return await fetchById(year + "-" + numberInYear);
 }
@@ -71,7 +75,4 @@ export async function fetchUsages(searchText) {
   return await fetchDefns(SERVLET_INVOCATION_USAGE, searchText);
 }
 
-export async function fetchLawTitles(year) {
-  return await fetchById(year);
-}
 */

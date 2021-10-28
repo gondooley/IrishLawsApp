@@ -9,8 +9,6 @@ const PageSections = (props) => {
   const [allSectionTitlesAreLoaded, setAllSectionTitlesAreLoaded] = useState(false);
   const [selectedSectionNumbersAsStringsArray, setSelectedSectionNumbersAsStringsArray] = useState([]);
   useEffect(() => {
-    console.log('First section: ' + props.sectionNumberFirstSelected);
-    console.log('Last section: ' + (props.sectionNumberFirstBeyond - 1));
     Database.fetchSectionHeadings(props.basicInfo.year, props.basicInfo.numberInYear)
       .then(data => {
         setAllSectionTitles(data);
@@ -59,6 +57,7 @@ const PageSections = (props) => {
           renderItem={({ item }) => {
             var onPressAction = () => {
               props.setSelectedSectionNumber(item);
+              props.setSelectedSectionTitle(allSectionTitles[item]);
               props.nav('section');
             }
             return (

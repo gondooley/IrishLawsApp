@@ -48,6 +48,9 @@ const PageLawBasicInfo = (props) => {
   return (
     <>
       <Text style={{ color: 'white' }}>
+        {props.basicInfo.title}
+      </Text>
+      <Text style={{ color: 'white' }}>
         Number {props.basicInfo.numberInYear} of {props.basicInfo.year}
       </Text>
       {hasParts ?

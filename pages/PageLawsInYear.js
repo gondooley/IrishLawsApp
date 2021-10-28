@@ -26,7 +26,7 @@ const PageLawsInYear = (props) => {
 
   const renderItem = (item) => {
     return (
-      <Pressable style={{ height: 40, justifyContent: 'center' }} onPress={() => goToLaw(Number.parseInt(item.numberInYear))}>
+      <Pressable style={{ height: 40, justifyContent: 'center' }} onPress={() => goToLaw(Number.parseInt(item.numberInYear), item.title)}>
         <Text>
           {item.numberInYear}. {item.title}
         </Text>
@@ -34,8 +34,9 @@ const PageLawsInYear = (props) => {
     );
   }
 
-  function goToLaw(numberInYear) {
+  function goToLaw(numberInYear, title) {
     props.setNumberInYear(numberInYear);
+    props.setTitle(title);
     props.nav('basicInfo');
   }
 

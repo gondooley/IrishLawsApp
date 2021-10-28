@@ -6,7 +6,6 @@ import * as Database from '../database';
 const PageDefns = (props) => {
 
   useEffect(() => {
-    console.log(props.exactResults + "/" + props.partialResults + "/" + props.usageResults);
     if (typeof props.allResults == 'undefined') {
       Database.fetchDefns(props.searchText)
         .then(searchResults => {
@@ -29,10 +28,10 @@ const PageDefns = (props) => {
           }
           altText = " of " + altText + " found in laws";
           let usageResults = convertFetchedDataIntoSectionListData
-          (searchResults["usages"],
-            'No usages' + altText,
-            'A single usage' + altText,
-            ' usages' + altText);
+            (searchResults["usages"],
+              'No usages' + altText,
+              'A single usage' + altText,
+              ' usages' + altText);
           props.setAllResults([exactResults, partialResults, usageResults]);
         }).catch((error) => { console.log('Error: ' + error); });
     }
@@ -73,26 +72,27 @@ const PageDefns = (props) => {
   }
 
   const MySectionList = () => {
-    console.log("Returning MySectionList");
     return (
       <SectionList
         sections={typeof props.allResults == "undefined" ? [] : props.allResults}
         keyExtractor={(item, index) => item + index}
         renderItem={({ item, index, section }) => {
-          // Not needed
-          // let year = item.substring(0, 4);
 
           var text;
           //check if partial result heading
           if (item.substring(0, 7) == 'heading') {
-            text = item;
+            return (
+              <Text>{item.substring(8)}</Text>
+            );
           } else {
-            // Skip past number in year
+            let year = item.substring(0, 4);
             let numberInYear = '';
             var index = 5; //skipping year
+            // skipping number in year
             for (; item[index] != '-'; index++) {
               numberInYear += item.substr(index, 1);
             }
+            numberInYear = Number(numberInYear);
 
             //extract sectionNumber and title
             let remainingText = item.substr(index + 1);
@@ -104,8 +104,17 @@ const PageDefns = (props) => {
               sectionNumber = sectionNumber.substr(8);
             }
             text = title + ", section " + sectionNumber;
+            return (<ResultsListItem
+              text={text}
+              year={year}
+              numberInYear={numberInYear}
+              title={title}
+              sectionNumber={sectionNumber}
+              fillBasicInfo={props.fillBasicInfo}
+              setSelectedSectionNumber={props.setSelectedSectionNumber}
+              setScheduleNumber={props.setScheduleNumber}
+              nav={props.nav} />);
           }
-          return (<ResultsListItem text={text} />);
         }}
         renderSectionHeader={({ section: { title } }) => (
           <Text style={{ fontWeight: 'bold', color: 'orange', alignContent: 'flex-start' }}>
