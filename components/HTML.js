@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import WebView from 'react-native-webview';
+import { ThemeContext } from "../settings/ThemeContext";
 
 const HTML = (props) => {
 
@@ -9,7 +10,11 @@ const HTML = (props) => {
   useEffect(() => {
     // This eliminates links.
     // TODO: 12:22 4 October 2021 (GOC) - Reinstate links
-    let html = String(props.source);
+    let html = eliminateLinks(String(props.source));
+    setEditedSource(html);
+  }, [props.source]);
+
+  function eliminateLinks(html) {
     let linkIndicator = '<a href=';
     let pos = html.indexOf(linkIndicator, 0);
 
@@ -25,13 +30,35 @@ const HTML = (props) => {
         + html.substring(closingTagIndex + 5, html.length);
         pos = html.indexOf(linkIndicator, pos + 1);
     }
-    setEditedSource(html);
-  }, [props.source]);
+    return html;
+  }
+
+  function getFontSize(theme) {
+    switch (theme) {
+      case 'huge':
+        return 88;
+      case 'big':
+        return 72;
+      case 'medium':
+        return 56;
+      case 'small':
+        return 40;
+      case 'tiny':
+      default:
+        return 24;
+    }
+  }
 
   return (
-    <WebView
-      source={{ 'html': editedSource }}
-      originWhitelist={['*']} />
+    <ThemeContext.Consumer>
+      {value => {
+        return (
+          <WebView
+          source={{ 'html': '<div style="font-size:' + getFontSize(value) + 'px">' + editedSource + "</div>" }}
+          originWhitelist={['*']} />    
+        );
+      }}
+      </ThemeContext.Consumer>
   );
 }
 

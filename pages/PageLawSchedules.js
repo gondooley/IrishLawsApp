@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Text } from 'react-native';
+import { Button, ScrollView, Text } from 'react-native';
 
 const PageLawSchedules = (props) => {
 
@@ -27,12 +27,12 @@ const PageLawSchedules = (props) => {
   }, [props.basicInfo]);
 
   return (
-    <>
+    <ScrollView>
       <Text style={{ color: 'white' }}>
         List of schedules for a law
       </Text>
       {scheduleButtons}
-    </>
+    </ScrollView>
   );
 }
 

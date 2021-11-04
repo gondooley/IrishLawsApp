@@ -68,10 +68,15 @@ import PageSchedule from './pages/PageSchedule';
 import PageSections from './pages/PageSections';
 import PageSection from './pages/PageSection';
 import Toolbar from './components/Toolbar';
+import ThemedText from './components/ThemedText'
 import * as Database from './database';
 import * as RomanNumerals from './romanNumerals';
+import { ThemeContext } from './settings/ThemeContext';
 
 const App = () => {
+  const [fontSize, setFontSize] = useState('medium');
+  // not initially set with fontSize, to avoid race condition
+
   const [searchInputActivated, setSearchInputActivated] = useState(false);
 
   const [currentPage, setCurrentPage] = useState('home');
@@ -214,7 +219,10 @@ const App = () => {
     } else {
       temp = [...breadcrumbs];
     }
-    temp.push(pageName);
+    if (!(pageName == "defns" && temp[temp.length - 1] == "defns")) {
+      temp.push(pageName);
+    }
+    console.log(temp);
     setBreadcrumbs(temp);
     setCurrentPage(pageName);
   }
@@ -272,132 +280,167 @@ const App = () => {
   const [isFontSizeModalVisible, setIsFontSizeModalVisible] = useState('false');
 
   return (
-    // Top app container
-    <SafeAreaView style={{ flex: 1, flexDirection: 'column', backgroundColor: '#339999' }}>
-      <Toolbar
-        modalCallback={setIsFontSizeModalVisible}
-        searchInputActivated={searchInputActivated}
-        setSearchInputActivated={setSearchInputActivated}
-        searchText={searchText}
-        setSearchText={setSearchText}
-        searchRequest={searchRequest}
-        title={toolbarTitle}
-      />
-      <View style={{ flex: 1 }}>
-        {currentPage == 'home' ? <PageHome
-          nav={switchPage}
+    <ThemeContext.Provider value={fontSize}>
+      {/* Top app container */}
+      <SafeAreaView style={{ flex: 1, flexDirection: 'column', backgroundColor: '#339999' }}>
+        <Toolbar
+          modalCallback={setIsFontSizeModalVisible}
           searchInputActivated={searchInputActivated}
           setSearchInputActivated={setSearchInputActivated}
-          searchRequest={searchRequest} /> : null}
-        {currentPage == 'defns' ? <PageDefns
-          nav={switchPage}
-          searchText={searchTextCopy}
-          allResults={allResults}
-          setAllResults={setAllResults}
-          fillBasicInfo={fillBasicInfo}
-          setSelectedSectionNumber={setSelectedSectionNumber}
-          setScheduleNumber={setScheduleNumber} /> : null}
-        {currentPage == 'years' ? <PageYearList nav={switchPage} setYear={setYear} /> : null}
-        {currentPage == 'lawsInYear' ? <PageLawsInYear
-          nav={switchPage}
-          year={basicInfo.year}
-          setNumberInYear={setNumberInYear}
-          setTitle={setTitle} /> : null}
-        {currentPage == 'basicInfo' ? <PageLawBasicInfo
-          nav={switchPage}
-          basicInfo={basicInfo}
-          setBasicInfo={setBasicInfo}
-          setParts={setPartsData}
-          setSelectedPart={setSelectedPart}
-          setSelectedChapterNumberAsString={setSelectedChapterNumberAsString}
-          setSectionNumberFirstSelected={setSectionNumberFirstSelected}
-          setSectionNumberFirstBeyond={setSectionNumberFirstBeyond} /> : null}
-        {currentPage == 'chapters' ? <PageLawPartChapters
-          nav={switchPage}
-          basicInfo={basicInfo}
-          partsData={partsData}
-          selectedPart={selectedPart}
-          setSelectedChapterNumberAsString={setSelectedChapterNumberAsString}
-          setSectionNumberFirstSelected={setSectionNumberFirstSelected}
-          setSectionNumberFirstBeyond={setSectionNumberFirstBeyond} /> : null}
-        {currentPage == 'parts' ? <PageLawParts
-          nav={switchPage}
-          basicInfo={basicInfo}
-          partsData={partsData}
-          setSelectedPart={setSelectedPart}
-          setSelectedChapterNumberAsString={setSelectedChapterNumberAsString}
-          setSectionNumberFirstSelected={setSectionNumberFirstSelected}
-          setSectionNumberFirstBeyond={setSectionNumberFirstBeyond} /> : null}
-        {currentPage == 'schedules' ? <PageLawSchedules
-          nav={switchPage}
-          basicInfo={basicInfo}
-          setScheduleNumber={setScheduleNumber} /> : null}
-        {currentPage == 'schedule' ? <PageSchedule
-          nav={switchPage}
-          basicInfo={basicInfo}
-          scheduleNumber={scheduleNumber} /> : null}
-        {currentPage == 'sections' ? <PageSections
-          nav={switchPage}
-          basicInfo={basicInfo}
-          selectedPart={selectedPart}
-          selectedChapterNumberAsString={selectedChapterNumberAsString}
-          sectionNumberFirstSelected={sectionNumberFirstSelected}
-          sectionNumberFirstBeyond={sectionNumberFirstBeyond}
-          setSelectedSectionNumber={setSelectedSectionNumber}
-          setSelectedSectionTitle={setSelectedSectionTitle} /> : null}
-        {currentPage == 'section' ? <PageSection
-          nav={switchPage}
-          basicInfo={basicInfo}
-          selectedPart={selectedPart}
-          selectedChapterNumberAsString={selectedChapterNumberAsString}
-          sectionNumberFirstSelected={sectionNumberFirstSelected}
-          sectionNumberFirstBeyond={sectionNumberFirstBeyond}
-          selectedSectionNumber={selectedSectionNumber}
-          selectedSectionTitle={selectedSectionTitle} /> : null}
-      </View>
-      {/* Ad container -  actual height*/}
-      <View style={{ height: 50, backgroundColor: 'red' }}>
-        <Text>Ad</Text>
-      </View>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isFontSizeModalVisible}
-        onRequestClose={() => {
-          setIsFontSizeModalVisible(false);
-        }}>
-        <View style={{
-          flex: 1,
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          margin: 40,
-          backgroundColor: "white",
-          borderRadius: 2,
-          padding: 35,
-          shadowColor: "#000",
-          shadowOffset: {
-            width: 0,
-            height: 2,
-          },
-          shadowOpacity: 0.25,
-          shadowRadius: 4,
-          elevation: 5,
-        }}>
-          <Text style={{ fontSize: 50 }}>Huge Text</Text>
-          <Text style={{ fontSize: 30 }}>Big Text</Text>
-          <Text style={{ fontSize: 22 }}>Medium Text</Text>
-          <Text style={{ fontSize: 16 }}>Small Text</Text>
-          <Text style={{ fontSize: 12 }}>Tiny Text</Text>
-          <Pressable
-            style={{ padding: 10 }}
-            onPress={() => setIsFontSizeModalVisible(false)}
-          >
-            <Text>Cancel</Text>
-          </Pressable>
+          searchText={searchText}
+          setSearchText={setSearchText}
+          searchRequest={searchRequest}
+          title={toolbarTitle}
+        />
+        <View style={{ flex: 1 }}>
+          {currentPage == 'home' ? <PageHome
+            nav={switchPage}
+            searchInputActivated={searchInputActivated}
+            setSearchInputActivated={setSearchInputActivated}
+            searchRequest={searchRequest} /> : null}
+          {currentPage == 'defns' ? <PageDefns
+            nav={switchPage}
+            searchText={searchTextCopy}
+            allResults={allResults}
+            setAllResults={setAllResults}
+            fillBasicInfo={fillBasicInfo}
+            setSelectedSectionNumber={setSelectedSectionNumber}
+            setScheduleNumber={setScheduleNumber} /> : null}
+          {currentPage == 'years' ? <PageYearList nav={switchPage} setYear={setYear} /> : null}
+          {currentPage == 'lawsInYear' ? <PageLawsInYear
+            nav={switchPage}
+            year={basicInfo.year}
+            setNumberInYear={setNumberInYear}
+            setTitle={setTitle} /> : null}
+          {currentPage == 'basicInfo' ? <PageLawBasicInfo
+            nav={switchPage}
+            basicInfo={basicInfo}
+            setBasicInfo={setBasicInfo}
+            setParts={setPartsData}
+            setSelectedPart={setSelectedPart}
+            setSelectedChapterNumberAsString={setSelectedChapterNumberAsString}
+            setSectionNumberFirstSelected={setSectionNumberFirstSelected}
+            setSectionNumberFirstBeyond={setSectionNumberFirstBeyond} /> : null}
+          {currentPage == 'chapters' ? <PageLawPartChapters
+            nav={switchPage}
+            basicInfo={basicInfo}
+            partsData={partsData}
+            selectedPart={selectedPart}
+            setSelectedChapterNumberAsString={setSelectedChapterNumberAsString}
+            setSectionNumberFirstSelected={setSectionNumberFirstSelected}
+            setSectionNumberFirstBeyond={setSectionNumberFirstBeyond} /> : null}
+          {currentPage == 'parts' ? <PageLawParts
+            nav={switchPage}
+            basicInfo={basicInfo}
+            partsData={partsData}
+            setSelectedPart={setSelectedPart}
+            setSelectedChapterNumberAsString={setSelectedChapterNumberAsString}
+            setSectionNumberFirstSelected={setSectionNumberFirstSelected}
+            setSectionNumberFirstBeyond={setSectionNumberFirstBeyond} /> : null}
+          {currentPage == 'schedules' ? <PageLawSchedules
+            nav={switchPage}
+            basicInfo={basicInfo}
+            setScheduleNumber={setScheduleNumber} /> : null}
+          {currentPage == 'schedule' ? <PageSchedule
+            nav={switchPage}
+            basicInfo={basicInfo}
+            scheduleNumber={scheduleNumber} /> : null}
+          {currentPage == 'sections' ? <PageSections
+            nav={switchPage}
+            basicInfo={basicInfo}
+            selectedPart={selectedPart}
+            selectedChapterNumberAsString={selectedChapterNumberAsString}
+            sectionNumberFirstSelected={sectionNumberFirstSelected}
+            sectionNumberFirstBeyond={sectionNumberFirstBeyond}
+            setSelectedSectionNumber={setSelectedSectionNumber}
+            setSelectedSectionTitle={setSelectedSectionTitle} /> : null}
+          {currentPage == 'section' ? <PageSection
+            nav={switchPage}
+            basicInfo={basicInfo}
+            selectedPart={selectedPart}
+            selectedChapterNumberAsString={selectedChapterNumberAsString}
+            sectionNumberFirstSelected={sectionNumberFirstSelected}
+            sectionNumberFirstBeyond={sectionNumberFirstBeyond}
+            selectedSectionNumber={selectedSectionNumber}
+            selectedSectionTitle={selectedSectionTitle} /> : null}
         </View>
-      </Modal>
-    </SafeAreaView>
-  );
+        {/* Ad container -  actual height*/}
+        <View style={{ height: 50, backgroundColor: 'red' }}>
+          <ThemedText text='Ad' />
+        </View>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={isFontSizeModalVisible}
+          onRequestClose={() => {
+            setIsFontSizeModalVisible(false);
+          }}>
+          <View style={{
+            flex: 1,
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            margin: 40,
+            backgroundColor: "white",
+            borderRadius: 2,
+            padding: 35,
+            shadowColor: "#000",
+            shadowOffset: {
+              width: 0,
+              height: 2,
+            },
+            shadowOpacity: 0.25,
+            shadowRadius: 4,
+            elevation: 5,
+          }}>
+            <Pressable onPress={() => {
+              setFontSize('huge');
+              setIsFontSizeModalVisible(false);
+            }}>
+              <ThemeContext.Provider value='huge'>
+                <ThemedText text='Huge Text' />
+              </ThemeContext.Provider>
+            </Pressable>
+            <Pressable onPress={() => {
+              setFontSize('big');
+              setIsFontSizeModalVisible(false);
+            }}>
+              <ThemeContext.Provider value='big'>
+                <ThemedText text='Big Text' />
+              </ThemeContext.Provider>
+            </Pressable>
+            <Pressable onPress={() => {
+              setFontSize('medium');
+              setIsFontSizeModalVisible(false);
+            }}>
+              <ThemeContext.Provider value='medium'>
+                <ThemedText text='Medium Text' />
+              </ThemeContext.Provider>
+            </Pressable>
+            <Pressable onPress={() => {
+              setFontSize('small');
+              setIsFontSizeModalVisible(false);
+            }}>
+              <ThemeContext.Provider value='small'>
+                <ThemedText text='Small Text' />
+              </ThemeContext.Provider>
+            </Pressable>
+            <Pressable onPress={() => {
+              setFontSize('tiny');
+              setIsFontSizeModalVisible(false);
+            }}>
+              <ThemeContext.Provider value='tiny'>
+                <ThemedText text='Tiny Text' />
+              </ThemeContext.Provider>
+            </Pressable>
+            <Pressable
+              style={{ padding: 10 }}
+              onPress={() => setIsFontSizeModalVisible(false)}>
+              <ThemedText text='Cancel' />
+            </Pressable>
+          </View>
+        </Modal>
+      </SafeAreaView>
+    </ThemeContext.Provider>);
 }
 
 export default App;
