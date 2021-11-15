@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Text } from 'react-native';
+import { Text } from 'react-native';
 import HTML from '../components/HTML'
 import * as Database from '../database';
 
 const PageSection = (props) => {
 
-  const [section, setSection] = useState('');
+  const [sectionOrSchedule, setSectionOrSchedule] = useState('');
+
   useEffect(() => {
-    Database.fetchSection(props.basicInfo.year, props.basicInfo.numberInYear, props.selectedSectionNumber)
+    Database.fetchSection(props.basicInfo.year,
+       props.basicInfo.numberInYear, props.selectedSectionNumber)
       .then(data => {
-        setSection(data.html);
+        setSectionOrSchedule(data.html);
       })
       .catch((error) => {
-        setSection('Error: ' + error);
+        setSectionOrSchedule('Error: ' + error);
       });
       // sometimes basicInfo is not prepared in time for page display
   }, [props.basicInfo]);
@@ -47,7 +49,7 @@ const PageSection = (props) => {
         {props.selectedSectionTitle != '' ?
           ': ' + props.selectedSectionTitle: null}
       </Text>
-      <HTML source={section} />
+      <HTML source={sectionOrSchedule} />
     </>
   );
 }

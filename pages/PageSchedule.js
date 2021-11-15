@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text } from 'react-native';
 import HTML from '../components/HTML';
 import * as Database from '../database';
 
 const PageSchedule = (props) => {
 
+  // TODO: migrate all this to PageSectionOrSchedule
+
   const [schedule, setSchedule] = useState('');
-  const [scheduleVisible, setScheduleVisible] = useState(false);
 
   useEffect(() => {
-    Database.fetchSchedule(props.basicInfo["year"],
-      props.basicInfo["numberInYear"], props.scheduleNumber)
+    Database.fetchSchedule(props.basicInfo.year,
+      props.basicInfo.numberInYear, props.scheduleNumber)
       .then(data => {
         setSchedule(data.html);
       })
@@ -19,19 +20,10 @@ const PageSchedule = (props) => {
       });
   }, []);
 
-  useEffect(() => {
-    if (schedule != '') {
-      setScheduleVisible(true);
-    }
-  }, [schedule]);
-
   return (
     <>
-      <Text style={{ color: 'white' }}>
-        Schedule display
-      </Text>
       <ScrollView contentContainerStyle={{ flex: 1 }}>
-        {scheduleVisible ? <HTML source={schedule} /> : null}
+        { schedule != '' ? <HTML source={schedule} /> : null}
       </ScrollView>
     </>
   );

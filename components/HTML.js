@@ -11,16 +11,30 @@ const HTML = (props) => {
     // This eliminates links.
     // TODO: 12:22 4 October 2021 (GOC) - Reinstate links
     let html = String(props.source);
-    html = eliminateLinks(html);
-
+    html = processLinks(html);
+    html = processImageLinks(html);
     //web margins are too big for the mobile display
     html = shrinkSubsequentValues(html, 'margin-');
     html = shrinkSubsequentValues(html, 'text-indent');
-    // console.log('----------');
-    // console.log(html);
-    // console.log('----------');
     setEditedSource(html);
   }, [props.source]);
+
+  function processImageLinks(html) {
+    let imageIndicator = '<img src="';
+    let pos = html.indexOf(imageIndicator, 0);
+
+    while (pos > -1) {
+      html = amendImageLink(html, pos);
+      pos = html.indexOf(imageIndicator, pos + 1);
+    }
+    return html;
+  }
+
+  function amendImageLink(html, pos) {
+    return html.substring(0, pos + 10)
+      + "https://irishlaws.s3.eu-west-1.amazonaws.com"
+      + html.substring(pos + 10);
+  }
 
   /**
    * Reduces the value following some html style attribute
@@ -54,7 +68,6 @@ const HTML = (props) => {
       }
       // make 8 times smaller
       let value = Number(stringValue) / 8;
-      console.log("Value: " + value);
       html = html.substring(0, startOfValueIndex) + value
         + html.substring(pos);
       pos = html.indexOf(indicator, pos);
@@ -63,28 +76,50 @@ const HTML = (props) => {
   }
 
   /**
-   * This method is used to strip out links.
-   * It will be removed when links are dealt with.
+   * Finds links and chooses what to do with them.
    * @param {String} html 
    * @returns html without links
    */
-  function eliminateLinks(html) {
+  function processLinks(html) {
     let linkIndicator = '<a href=';
     let pos = html.indexOf(linkIndicator, 0);
+    html += `
+      <script>
+        function handleClick(msg) {
+          window.ReactNativeWebView.postMessage(msg);
+        }
+      </script>
+    `
 
     while (pos > -1) {
-      // 1 beyond the end of the link anchor
-      let openingTagEndIndex = html.indexOf('>', pos) + 1;
-      let closingTagIndex = html.indexOf('</a>', openingTagEndIndex);
-      // before opening tag
-      html = html.substring(0, pos - 1) + " "
-        // element inner html
-        + html.substring(openingTagEndIndex, closingTagIndex)
-        // after closing tag
-        + " " + html.substring(closingTagIndex + 5, html.length);
+      // html = eliminateLink(html, pos);
+      html = putClickTester(html, pos);
       pos = html.indexOf(linkIndicator, pos + 1);
     }
     return html;
+  }
+
+  function putClickTester(html, pos) {
+    // 1 beyond the end of the link anchor
+    let openingTagEndIndex = html.indexOf('>', pos) + 1;
+    let closingTagIndex = html.indexOf('</a>', openingTagEndIndex);
+
+    return html.substring(0, pos - 1) + " "                     // before opening tag
+      + '<a href="#" onclick="handleClick(`Might sub this out`);event.preventDefault();">'
+      + html.substring(openingTagEndIndex, closingTagIndex)     // element inner html
+      + "</a>"
+      + " " + html.substring(closingTagIndex + 5, html.length); // after closing tag
+
+  }
+
+  function eliminateLink(html, pos) {
+    // 1 beyond the end of the link anchor
+    let openingTagEndIndex = html.indexOf('>', pos) + 1;
+    let closingTagIndex = html.indexOf('</a>', openingTagEndIndex);
+
+    return html.substring(0, pos - 1) + " "                     // before opening tag
+      + html.substring(openingTagEndIndex, closingTagIndex)     // element inner html
+      + " " + html.substring(closingTagIndex + 5, html.length); // after closing tag
   }
 
   function getFontSize(theme) {
@@ -103,13 +138,47 @@ const HTML = (props) => {
     }
   }
 
+  function htmlToConsole(html) {
+    let nextOutput = '';
+    // let depth = 0;
+    let isFirstChar = true;
+    // let previousChar = '';
+    let isTag = false;
+    Array.from(html).forEach(function (character) {
+      if (isFirstChar) {
+        nextOutput = character;
+        isFirstChar = false;
+      } else {
+        if (character = '<') {
+          isTag = true;
+        }
+        // ' '.repeat(depth) + nextOutput
+      }
+    });
+
+  }
+
+  function linkClickDetected() {
+    console.log("Link click detected");
+  }
+
   return (
     <ThemeContext.Consumer>
       {value => {
+        let text = '<div style="font-size:'
+          + getFontSize(value) + 'px;margin-right:0.50em">'
+          + editedSource + "</div>";
+        text = text.replace(/display:block/g, '');
+        console.log('----------');
+        console.log(text);
+        console.log('----------');
         return (
           <WebView
-            source={{ 'html': '<div style="font-size:' + getFontSize(value) + 'px;margin-right:0.50em">' + editedSource + "</div>" }}
-            originWhitelist={['*']} />
+            source={{ 'html': text }}
+            originWhitelist={['*']}
+            onMessage={(event) => {
+              console.log("There's a click: " + event.nativeEvent.data);
+            }} />
         );
       }}
     </ThemeContext.Consumer>

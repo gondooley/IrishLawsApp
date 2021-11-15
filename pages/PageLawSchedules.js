@@ -3,13 +3,11 @@ import { Button, ScrollView, Text } from 'react-native';
 
 const PageLawSchedules = (props) => {
 
-  const [scheduleCount, setScheduleCount] = useState(0);
   const [scheduleButtons, setScheduleButtons] = useState([]);
 
   useEffect(() => {
     let numSchedules = props.basicInfo["numSchedules"];
     if (numSchedules > 0) {
-      setScheduleCount(numSchedules);
       let arr = [];
       for (let i = 1; i <= numSchedules; i++) {
         arr.push(i);
