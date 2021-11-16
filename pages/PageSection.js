@@ -5,16 +5,16 @@ import * as Database from '../database';
 
 const PageSection = (props) => {
 
-  const [sectionOrSchedule, setSectionOrSchedule] = useState('');
+  const [section, setSection] = useState('');
 
   useEffect(() => {
     Database.fetchSection(props.basicInfo.year,
        props.basicInfo.numberInYear, props.selectedSectionNumber)
       .then(data => {
-        setSectionOrSchedule(data.html);
+        setSection(data.html);
       })
       .catch((error) => {
-        setSectionOrSchedule('Error: ' + error);
+        setSection('Error: ' + error);
       });
       // sometimes basicInfo is not prepared in time for page display
   }, [props.basicInfo]);
@@ -49,7 +49,7 @@ const PageSection = (props) => {
         {props.selectedSectionTitle != '' ?
           ': ' + props.selectedSectionTitle: null}
       </Text>
-      <HTML source={sectionOrSchedule} />
+      <HTML source={section} />
     </>
   );
 }

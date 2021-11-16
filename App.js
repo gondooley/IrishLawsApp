@@ -222,7 +222,7 @@ const App = () => {
     if (!(pageName == "defns" && temp[temp.length - 1] == "defns")) {
       temp.push(pageName);
     }
-    console.log(temp);
+    // console.log(temp);
     setBreadcrumbs(temp);
     setCurrentPage(pageName);
   }
@@ -278,6 +278,50 @@ const App = () => {
   })
 
   const [isFontSizeModalVisible, setIsFontSizeModalVisible] = useState('false');
+
+  function handleLink(link) {
+    console.log('Handling link');
+    let tokens = link.split('-');
+    let year = tokens[0];
+    let numberInYear = tokens[1];
+    console.log("tokens.length: " + tokens.length);
+    if (tokens.length == 3) {
+      // different law => new basicInfo etc
+      if (year != basicInfo.year || numberInYear != basicInfo.numberInYear) {
+        Database.fetchBasicInfo(year, numberInYear)
+          .then((data) => {
+            data["year"] = year;
+            data["numberInYear"] = numberInYear;
+            setBasicInfo(data);
+            if (data.numParts > 0) {
+              Database.fetchParts(year, numberInYear)
+                .then(data => {
+                  setParts(data);
+                }).catch((error) => {
+                  console.error('Error getting parts: ' + error);
+                });
+            } else {
+              setParts({});
+            }
+            if (isNaN(tokens[2])) {
+              //part or schedule?
+            } else {
+              // section
+              setSelectedSectionNumber(tokens[2]);
+              switchPage('section');
+            }
+          }).catch((error) => {
+            console.error('Error: ' + error);
+          });
+      } else {
+        if (isNaN(tokens[2])) {
+          setSelectedSectionNumber(tokens[2]);
+          switchPage('section');
+        }
+      };
+    }
+  }
+
 
   return (
     <ThemeContext.Provider value={fontSize}>
@@ -344,7 +388,8 @@ const App = () => {
           {currentPage == 'schedule' ? <PageSchedule
             nav={switchPage}
             basicInfo={basicInfo}
-            scheduleNumber={scheduleNumber} /> : null}
+            scheduleNumber={scheduleNumber}
+            handleLink={handleLink} /> : null}
           {currentPage == 'sections' ? <PageSections
             nav={switchPage}
             basicInfo={basicInfo}

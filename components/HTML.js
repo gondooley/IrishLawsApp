@@ -12,25 +12,25 @@ const HTML = (props) => {
     // TODO: 12:22 4 October 2021 (GOC) - Reinstate links
     let html = String(props.source);
     html = processLinks(html);
-    html = processImageLinks(html);
+    html = processImageSources(html);
     //web margins are too big for the mobile display
     html = shrinkSubsequentValues(html, 'margin-');
     html = shrinkSubsequentValues(html, 'text-indent');
     setEditedSource(html);
   }, [props.source]);
 
-  function processImageLinks(html) {
+  function processImageSources(html) {
     let imageIndicator = '<img src="';
     let pos = html.indexOf(imageIndicator, 0);
 
     while (pos > -1) {
-      html = amendImageLink(html, pos);
+      html = amendImageSource(html, pos);
       pos = html.indexOf(imageIndicator, pos + 1);
     }
     return html;
   }
 
-  function amendImageLink(html, pos) {
+  function amendImageSource(html, pos) {
     return html.substring(0, pos + 10)
       + "https://irishlaws.s3.eu-west-1.amazonaws.com"
       + html.substring(pos + 10);
@@ -81,8 +81,22 @@ const HTML = (props) => {
    * @returns html without links
    */
   function processLinks(html) {
-    let linkIndicator = '<a href=';
+    let linkIndicator = '<a href="';
     let pos = html.indexOf(linkIndicator, 0);
+    console.log("First pos: " + pos);
+    // becomes -1 when exhausted
+    while (pos >= 0) {
+      let startOfLink = pos + linkIndicator.length;
+      let endOfLink = html.indexOf('"', startOfLink);
+      let link = html.substring(startOfLink, endOfLink);
+      // I have not yet found uses for other extant attributes, e.g. value1=""
+      let endOfOpeningTagIndex = html.indexOf('>', endOfLink);
+      html = html.substring(0, startOfLink)
+        + '#" onclick="handleClick(`' + link + '`);event.preventDefault();"'
+        + html.substring(endOfOpeningTagIndex);
+
+      pos = html.indexOf(linkIndicator, pos + 1);
+    }
     html += `
       <script>
         function handleClick(msg) {
@@ -93,7 +107,8 @@ const HTML = (props) => {
 
     while (pos > -1) {
       // html = eliminateLink(html, pos);
-      html = putClickTester(html, pos);
+      // html = putClickTester(html, pos);
+
       pos = html.indexOf(linkIndicator, pos + 1);
     }
     return html;
@@ -177,7 +192,7 @@ const HTML = (props) => {
             source={{ 'html': text }}
             originWhitelist={['*']}
             onMessage={(event) => {
-              console.log("There's a click: " + event.nativeEvent.data);
+              props.handleLink(event.nativeEvent.data);
             }} />
         );
       }}

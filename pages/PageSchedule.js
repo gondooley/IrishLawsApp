@@ -23,7 +23,11 @@ const PageSchedule = (props) => {
   return (
     <>
       <ScrollView contentContainerStyle={{ flex: 1 }}>
-        { schedule != '' ? <HTML source={schedule} /> : null}
+        {schedule != '' ?
+          <HTML
+            source={schedule}
+            handleLink={props.handleLink}
+          /> : null}
       </ScrollView>
     </>
   );
