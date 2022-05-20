@@ -58,7 +58,7 @@ const PageSections = (props) => {
             var onPressAction = () => {
               props.setSelectedSectionNumber(item);
               props.setSelectedSectionTitle(allSectionTitles[item]);
-              props.nav('section');
+              props.switchPage('section');
             }
             return (
               <Pressable style={{ minHeight: 40, justifyContent: 'center' }}

@@ -56,7 +56,7 @@ const PageLawBasicInfo = (props) => {
       {hasParts ?
         <Button
           onPress={() => {
-            props.nav('parts');
+            props.switchPage('parts');
           }}
           title={props.basicInfo.numSections + ' sections in ' + props.basicInfo.numParts + " parts"}
           color="#841584" /> : null}
@@ -69,7 +69,7 @@ const PageLawBasicInfo = (props) => {
             
             props.setSectionNumberFirstSelected(1);
             props.setSectionNumberFirstBeyond(props.basicInfo.numSections + 1);
-            props.nav('sections');
+            props.switchPage('sections');
           }}
           title={String(props.basicInfo.numSections) + ' sections'}
           color="#841584" /> : null}
@@ -77,13 +77,13 @@ const PageLawBasicInfo = (props) => {
       {scheduleCount > 0 ?
         <Button
           onPress={() => {
-            props.nav('schedules');
+            props.switchPage('schedules');
           }}
           title={scheduleCount == 1 ? 'Schedule' : scheduleCount + ' schedules'}
           color="#841584" /> : null}
       {fullBasicInfoLoaded
         ? Object.keys(props.basicInfo.description).map((key) =>
-          <HTML source={props.basicInfo.description[key]} key={key}/>)
+          <HTML source={props.basicInfo.description[key]} key={key} handleLink={props.handleLink}/>)
         : null}
       <Text style={{ color: 'white' }}>
         {props.basicInfo.date}

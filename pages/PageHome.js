@@ -36,7 +36,7 @@ const PageHome = (props) => {
               resizeMode: 'contain',
             }} />
         </View>
-        <HomeButton onPress={() => props.nav('years')} style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <HomeButton onPress={() => props.switchPage('years')} style={{ justifyContent: 'center', alignItems: 'center' }}>
           Choose law by year
         </HomeButton>
       </View>

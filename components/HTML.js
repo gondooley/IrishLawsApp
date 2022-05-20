@@ -173,10 +173,6 @@ const HTML = (props) => {
 
   }
 
-  function linkClickDetected() {
-    console.log("Link click detected");
-  }
-
   return (
     <ThemeContext.Consumer>
       {value => {
@@ -184,9 +180,9 @@ const HTML = (props) => {
           + getFontSize(value) + 'px;margin-right:0.50em">'
           + editedSource + "</div>";
         text = text.replace(/display:block/g, '');
-        console.log('----------');
-        console.log(text);
-        console.log('----------');
+        // console.log('----------');
+        // console.log(text);
+        // console.log('----------');
         return (
           <WebView
             source={{ 'html': text }}

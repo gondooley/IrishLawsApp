@@ -26,7 +26,7 @@ const PageLawParts = (props) => {
             if (Object.keys(part).includes('chapters')) {
               onPressAction = () => {
                 props.setSelectedPart(part);
-                props.nav('chapters');
+                props.switchPage('chapters');
               }
             } else {
               onPressAction = () => {
@@ -64,7 +64,7 @@ const PageLawParts = (props) => {
                     props.setSectionNumberFirstBeyond(Number(props.partsData[String(nextPart)]['first section']));
                   }
                 }
-                props.nav('sections');
+                props.switchPage('sections');
               }
             }
             var text;

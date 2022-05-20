@@ -38,7 +38,7 @@ const PageLawPartChapters = (props) => {
 
 
 
-            props.nav('sections');
+            props.switchPage('sections');
 
 
           }

@@ -117,8 +117,10 @@ const App = () => {
       let isSearchToSection = false;
       // possibleBreadcrumbs has been passed to avoid race conditions
       if (typeof possibleBreadcrumbs == 'object') {
-        if (possibleBreadcrumbs[possibleBreadcrumbs.length - 1] == 'defns') {
+        if (possibleBreadcrumbs[possibleBreadcrumbs.length - 1] == 'defns'
+          || possibleBreadcrumbs[possibleBreadcrumbs.length - 1] == 'section') {
           isSearchToSection = true;
+          console.log("Is counted as a search to section");
         }
       } else {
         if (breadcrumbs[breadcrumbs.length - 1] == 'defns') {
@@ -280,7 +282,7 @@ const App = () => {
   const [isFontSizeModalVisible, setIsFontSizeModalVisible] = useState('false');
 
   function handleLink(link) {
-    console.log('Handling link');
+    console.log('Handling link: ' + link);
     let tokens = link.split('-');
     let year = tokens[0];
     let numberInYear = tokens[1];
@@ -288,6 +290,7 @@ const App = () => {
     if (tokens.length == 3) {
       // different law => new basicInfo etc
       if (year != basicInfo.year || numberInYear != basicInfo.numberInYear) {
+        console.log("Link from a different law");
         Database.fetchBasicInfo(year, numberInYear)
           .then((data) => {
             data["year"] = year;
@@ -314,7 +317,7 @@ const App = () => {
             console.error('Error: ' + error);
           });
       } else {
-        if (isNaN(tokens[2])) {
+        if (!isNaN(tokens[2])) {
           setSelectedSectionNumber(tokens[2]);
           switchPage('section');
         }
@@ -338,35 +341,36 @@ const App = () => {
         />
         <View style={{ flex: 1 }}>
           {currentPage == 'home' ? <PageHome
-            nav={switchPage}
+            switchPage={switchPage}
             searchInputActivated={searchInputActivated}
             setSearchInputActivated={setSearchInputActivated}
             searchRequest={searchRequest} /> : null}
           {currentPage == 'defns' ? <PageDefns
-            nav={switchPage}
+            switchPage={switchPage}
             searchText={searchTextCopy}
             allResults={allResults}
             setAllResults={setAllResults}
             fillBasicInfo={fillBasicInfo}
             setSelectedSectionNumber={setSelectedSectionNumber}
             setScheduleNumber={setScheduleNumber} /> : null}
-          {currentPage == 'years' ? <PageYearList nav={switchPage} setYear={setYear} /> : null}
+          {currentPage == 'years' ? <PageYearList switchPage={switchPage} setYear={setYear} /> : null}
           {currentPage == 'lawsInYear' ? <PageLawsInYear
-            nav={switchPage}
+            switchPage={switchPage}
             year={basicInfo.year}
             setNumberInYear={setNumberInYear}
             setTitle={setTitle} /> : null}
           {currentPage == 'basicInfo' ? <PageLawBasicInfo
-            nav={switchPage}
+            switchPage={switchPage}
             basicInfo={basicInfo}
             setBasicInfo={setBasicInfo}
             setParts={setPartsData}
             setSelectedPart={setSelectedPart}
             setSelectedChapterNumberAsString={setSelectedChapterNumberAsString}
             setSectionNumberFirstSelected={setSectionNumberFirstSelected}
-            setSectionNumberFirstBeyond={setSectionNumberFirstBeyond} /> : null}
+            setSectionNumberFirstBeyond={setSectionNumberFirstBeyond}
+            handleLink={handleLink} /> : null}
           {currentPage == 'chapters' ? <PageLawPartChapters
-            nav={switchPage}
+            switchPage={switchPage}
             basicInfo={basicInfo}
             partsData={partsData}
             selectedPart={selectedPart}
@@ -374,7 +378,7 @@ const App = () => {
             setSectionNumberFirstSelected={setSectionNumberFirstSelected}
             setSectionNumberFirstBeyond={setSectionNumberFirstBeyond} /> : null}
           {currentPage == 'parts' ? <PageLawParts
-            nav={switchPage}
+            switchPage={switchPage}
             basicInfo={basicInfo}
             partsData={partsData}
             setSelectedPart={setSelectedPart}
@@ -382,16 +386,16 @@ const App = () => {
             setSectionNumberFirstSelected={setSectionNumberFirstSelected}
             setSectionNumberFirstBeyond={setSectionNumberFirstBeyond} /> : null}
           {currentPage == 'schedules' ? <PageLawSchedules
-            nav={switchPage}
+            switchPage={switchPage}
             basicInfo={basicInfo}
             setScheduleNumber={setScheduleNumber} /> : null}
           {currentPage == 'schedule' ? <PageSchedule
-            nav={switchPage}
+            switchPage={switchPage}
             basicInfo={basicInfo}
             scheduleNumber={scheduleNumber}
             handleLink={handleLink} /> : null}
           {currentPage == 'sections' ? <PageSections
-            nav={switchPage}
+            switchPage={switchPage}
             basicInfo={basicInfo}
             selectedPart={selectedPart}
             selectedChapterNumberAsString={selectedChapterNumberAsString}
@@ -400,14 +404,15 @@ const App = () => {
             setSelectedSectionNumber={setSelectedSectionNumber}
             setSelectedSectionTitle={setSelectedSectionTitle} /> : null}
           {currentPage == 'section' ? <PageSection
-            nav={switchPage}
+            switchPage={switchPage}
             basicInfo={basicInfo}
             selectedPart={selectedPart}
             selectedChapterNumberAsString={selectedChapterNumberAsString}
             sectionNumberFirstSelected={sectionNumberFirstSelected}
             sectionNumberFirstBeyond={sectionNumberFirstBeyond}
             selectedSectionNumber={selectedSectionNumber}
-            selectedSectionTitle={selectedSectionTitle} /> : null}
+            selectedSectionTitle={selectedSectionTitle}
+            handleLink={handleLink} /> : null}
         </View>
         {/* Ad container -  actual height*/}
         <View style={{ height: 50, backgroundColor: 'red' }}>

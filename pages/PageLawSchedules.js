@@ -16,7 +16,7 @@ const PageLawSchedules = (props) => {
         return <Button key={index}
           onPress={() => {
             props.setScheduleNumber(number);
-            props.nav('schedule');
+            props.switchPage('schedule');
           }}
           title={"Schedule " + number}
           color="#841584" />

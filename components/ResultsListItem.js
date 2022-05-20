@@ -10,10 +10,10 @@ const ResultsListItem = (props) => {
         props.fillBasicInfo(props.year, props.numberInYear, props.title);
         if (props.sectionNumber.startsWith('schedule')) {
           props.setScheduleNumber(props.sectionNumber.substring(8));
-          props.nav('schedule');
+          props.switchPage('schedule');
         } else {
           props.setSelectedSectionNumber(props.sectionNumber);
-          props.nav('section');
+          props.switchPage('section');
         }
       }}>
       <View style={{ flexDirection: 'column' }}>

@@ -49,7 +49,7 @@ const PageSection = (props) => {
         {props.selectedSectionTitle != '' ?
           ': ' + props.selectedSectionTitle: null}
       </Text>
-      <HTML source={section} />
+      <HTML source={section} handleLink={props.handleLink}/>
     </>
   );
 }

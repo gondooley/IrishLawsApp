@@ -12,7 +12,7 @@ const PageYearList = (props) => {
 
   function goToYear(year) {
     props.setYear(JSON.stringify(year));
-    props.nav('lawsInYear');
+    props.switchPage('lawsInYear');
   }
 
   const renderItem = ({ item }) => (

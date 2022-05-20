@@ -113,7 +113,7 @@ const PageDefns = (props) => {
               fillBasicInfo={props.fillBasicInfo}
               setSelectedSectionNumber={props.setSelectedSectionNumber}
               setScheduleNumber={props.setScheduleNumber}
-              nav={props.nav} />);
+              switchPage={props.switchPage} />);
           }
         }}
         renderSectionHeader={({ section: { title } }) => (

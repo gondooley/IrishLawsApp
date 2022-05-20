@@ -37,7 +37,7 @@ const PageLawsInYear = (props) => {
   function goToLaw(numberInYear, title) {
     props.setNumberInYear(numberInYear);
     props.setTitle(title);
-    props.nav('basicInfo');
+    props.switchPage('basicInfo');
   }
 
 
